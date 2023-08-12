@@ -26,11 +26,13 @@ struct Renderer {
     ~Renderer();
 
     Renderer(const Renderer &other) = delete;
+
     Renderer(Renderer &&other) = default;
+
     Renderer &operator=(const Renderer &other) = delete;
+
     Renderer &operator=(Renderer &&other) = default;
 
     void init();
-
     void render();
 };

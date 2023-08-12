@@ -26,7 +26,10 @@ struct VkGlobal {
     };
 
     VkGlobal(const VkGlobal &other) = delete;
+
     VkGlobal(VkGlobal &&other) = default;
+
     VkGlobal &operator=(const VkGlobal &other) = delete;
+
     VkGlobal &operator=(VkGlobal &&other) = default;
 };

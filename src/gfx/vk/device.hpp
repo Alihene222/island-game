@@ -17,10 +17,12 @@ struct Device {
     ~Device();
 
     Device(const Device &other) = delete;
+
     Device(Device &&other) {
 	*this = std::move(other);
     }
     Device &operator=(const Device &other) = delete;
+
     Device &operator=(Device &&other) {
 	this->handle = other.handle;
 	this->queue_graphics = other.queue_graphics;
