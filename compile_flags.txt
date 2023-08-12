@@ -1,0 +1,11 @@
+-iquote
+src
+-I
+lib/bgfx/include
+-I
+lib/bx/include
+-I
+lib/bimg/include
+-I
+lib/glfw/include
+-std=c++20
