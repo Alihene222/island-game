@@ -40,3 +40,12 @@ bool GLFWWindow::is_close_requested() {
 bool GLFWWindow::is_key_pressed(u32 key) {
     return glfwGetKey(this->window, key) == GLFW_PRESS;
 }
+
+std::tuple<u32, const char**> GLFWWindow::get_extension_info() {
+    u32 extension_count = 0;
+    const char **extensions =
+	glfwGetRequiredInstanceExtensions(&extension_count);
+    
+    return std::tuple<u32, const char**>(
+	extension_count, extensions);
+}

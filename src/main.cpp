@@ -3,6 +3,8 @@
 Global global;
 
 int main() {
+    global.debug = true;
+
     Platform platform;
     platform.window = std::make_unique<GLFWWindow>(
 	"Hello, World!", 800, 600);

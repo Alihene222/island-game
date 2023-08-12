@@ -39,6 +39,8 @@ struct GLFWWindow {
     bool is_close_requested();
 
     bool is_key_pressed(u32 key);
+
+    std::tuple<u32, const char**> get_extension_info();
 };
 
 struct Platform {

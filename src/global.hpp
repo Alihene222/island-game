@@ -9,6 +9,8 @@
 struct Renderer;
 
 struct Global {
+    bool debug;
+
     Platform *platform;
     Timer *timer;
     Renderer *renderer;

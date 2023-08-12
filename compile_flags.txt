@@ -1,11 +1,9 @@
 -iquote
 src
 -I
-lib/bgfx/include
+lib/vulkan
 -I
-lib/bx/include
--I
-lib/bimg/include
+lib/vk_video
 -I
 lib/glfw/include
 -std=c++20

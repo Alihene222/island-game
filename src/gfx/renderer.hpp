@@ -1,9 +1,11 @@
 #pragma once
 
 #include "gfx.hpp"
-#include "program.hpp"
+#include "vk/instance.hpp"
 
 struct Renderer {
+    std::unique_ptr<vkn::Instance> vk_instance;
+
     Renderer();
 
     ~Renderer();
