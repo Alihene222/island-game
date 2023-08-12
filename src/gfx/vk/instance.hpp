@@ -1,18 +1,14 @@
 #pragma once
 
-#include "../gfx.hpp"
+#include "gfx//gfx.hpp"
 #include "util/std.hpp"
 
 namespace vkn {
 
 struct Instance {
-    VkInstance instance;
+    VkInstance handle;
 
     VkDebugUtilsMessengerEXT debug_messenger;
-
-    const std::vector<const char*> layers = {
-	"VK_LAYER_KHRONOS_validation"
-    };
 
     Instance();
     ~Instance();
@@ -23,8 +19,8 @@ struct Instance {
     }
     Instance &operator=(const Instance &other) = delete;
     Instance &operator=(Instance &&other) {
-	this->instance = other.instance;
-	other.instance = VK_NULL_HANDLE;
+	this->handle = other.handle;
+	other.handle = VK_NULL_HANDLE;
 	return *this;
     }
 };

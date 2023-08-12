@@ -14,7 +14,9 @@ struct Timer {
     u64 delta;
     u64 tick_remainder = 0;
 
-    Timer() {
+    Timer() = default;
+
+    void init() {
 	this->last_frame = ns_now();
 	this->last_second = ns_now();
     }

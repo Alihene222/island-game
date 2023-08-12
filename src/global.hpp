@@ -3,6 +3,7 @@
 #include "platform/platform.hpp"
 #include "util/time.hpp"
 #include "gfx/renderer.hpp"
+#include "gfx/vk/vk_global.hpp"
 #include "state.hpp"
 #include "state_game.hpp"
 
@@ -13,6 +14,7 @@ struct Global {
 
     Platform *platform;
     Timer *timer;
+    VkGlobal *vk_global;
     Renderer *renderer;
 
     // Current state

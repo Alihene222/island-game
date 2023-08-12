@@ -1,6 +1,7 @@
 #include "instance.hpp"
 
 #include "global.hpp"
+#include "gfx/renderer.hpp"
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
@@ -92,8 +93,8 @@ vkn::Instance::Instance() {
     create_info.ppEnabledExtensionNames = extensions.data();
 
     if(global.debug) {
-	create_info.enabledLayerCount = this->layers.size();
-	create_info.ppEnabledLayerNames = &this->layers[0];
+	create_info.enabledLayerCount = Renderer::layer_count;
+	create_info.ppEnabledLayerNames = &Renderer::layers[0];
 
 	auto dbg_create_info = make_debug_messenger_create_info();
 	create_info.pNext = &dbg_create_info;
@@ -104,8 +105,7 @@ vkn::Instance::Instance() {
 
     if(vkCreateInstance(
 	&create_info,
-	nullptr,
-	&this->instance) != VK_SUCCESS) {
+	nullptr, &this->handle) != VK_SUCCESS) {
 	log("Failed to create vulkan instance", LOG_LEVEL_FATAL);
 	std::exit(-1);
     }
@@ -113,7 +113,7 @@ vkn::Instance::Instance() {
     if(global.debug) {
 	auto dbg_create_info = make_debug_messenger_create_info();
 	if(vk_create_debug_utils_messenger_EXT(
-	    this->instance,
+	    this->handle,
 	    &dbg_create_info,
 	    nullptr,
 	    &this->debug_messenger) != VK_SUCCESS) {
@@ -128,8 +128,8 @@ vkn::Instance::Instance() {
 vkn::Instance::~Instance() {
     if(global.debug) {
 	vk_destroy_debug_utils_messenger_EXT(
-	    this->instance, this->debug_messenger, nullptr);
+	    this->handle, this->debug_messenger, nullptr);
     }
 
-    vkDestroyInstance(this->instance, nullptr);
+    vkDestroyInstance(this->handle, nullptr);
 }

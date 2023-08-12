@@ -3,6 +3,7 @@
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
 #include "util/util.hpp"
+#include "gfx/vk/instance.hpp"
 
 struct Mouse {
     f32 x, y;
@@ -41,6 +42,10 @@ struct GLFWWindow {
     bool is_key_pressed(u32 key);
 
     std::tuple<u32, const char**> get_extension_info();
+
+    VkSurfaceKHR create_surface();
+
+    std::tuple<i32, i32> get_size();
 };
 
 struct Platform {

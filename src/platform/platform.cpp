@@ -1,5 +1,7 @@
 #include "platform.hpp"
 
+#include "global.hpp"
+
 static void glfw_error_callback(int err, const char *msg) {
     log(std::string(msg), LOG_LEVEL_FATAL);
 }
@@ -48,4 +50,23 @@ std::tuple<u32, const char**> GLFWWindow::get_extension_info() {
     
     return std::tuple<u32, const char**>(
 	extension_count, extensions);
+}
+
+VkSurfaceKHR GLFWWindow::create_surface() {
+    VkSurfaceKHR surface;
+    if(glfwCreateWindowSurface(
+	global.vk_global->instance->handle,
+	this->window,
+	nullptr,
+	&surface) != VK_SUCCESS) {
+	log("Failed to create window surface", LOG_LEVEL_FATAL);
+	std::exit(-1);
+    }
+    return surface;
+}
+
+std::tuple<i32, i32> GLFWWindow::get_size() {
+    i32 width, height;
+    glfwGetFramebufferSize(this->window, &width, &height);
+    return std::tuple<i32, u32>(width, height);
 }

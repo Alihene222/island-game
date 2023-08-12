@@ -2,7 +2,7 @@
 
 Global global;
 
-int main() {
+int main(UNUSED int agc, UNUSED char **argv) {
     global.debug = true;
 
     Platform platform;
@@ -16,13 +16,20 @@ int main() {
     Renderer renderer;
     global.renderer = &renderer;
 
+    // Global vulkan state. Initialized in Renderer
+    VkGlobal vk_global;
+    global.vk_global = &vk_global;
+
+    renderer.init();
+
     StateGame game;
     global.game = &game;
     global.state = global.game;
     global.state->init();
 
-    while(!platform.window->is_close_requested()) {
+    timer.init();
 
+    while(!platform.window->is_close_requested()) {
 	global.state->update();
 	
 	timer.tick([&]() {
