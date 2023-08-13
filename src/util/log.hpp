@@ -16,21 +16,23 @@ inline void log(std::string message, LogLevel level) {
 
     std::string level_str;
 
+    std::string ansi_color;
+
     switch (level) {
     case LOG_LEVEL_INFO:
-        level_str = "[INFO]";
+        level_str = "\x1b[0;37m[INFO]";
         break;
     case LOG_LEVEL_DEBUG:
-        level_str = "[DEBUG]";
+        level_str = "\x1b[0;92m[DEBUG]";
         break;
     case LOG_LEVEL_WARN:
-        level_str = "[WARN]";
+        level_str = "\x1b[0;33m[WARN]";
         break;
     case LOG_LEVEL_ERROR:
-        level_str = "[ERROR]";
+        level_str = "\x1b[0;31m[ERROR]";
         break;
     case LOG_LEVEL_FATAL:
-        level_str = "[FATAL]";
+        level_str = "\x1b[0;91m[FATAL]";
         break;
     }
 
@@ -45,15 +47,6 @@ inline void log(std::string message, LogLevel level) {
 	+ std::to_string(now->tm_sec);
 
     std::cout
-	<< "["
-	<< hour
-	<< ":"
-	<< minute
-	<< ":"
-	<< second
-	<< "] "
-	<< level_str
-	<< " "
-	<< message
-	<< std::endl;
+	<< "[" << hour << ":" << minute << ":" << second << "] "
+	<< level_str << " " << message << "\x1b[0m" << std::endl;
 }

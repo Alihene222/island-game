@@ -75,8 +75,9 @@ void Renderer::render() {
     this->command_buffer->record(
 	image_index, this->pipelines["main"]);
 
-    VkSubmitInfo submit_info {};
-    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    VkSubmitInfo *submit_info =
+	global.frame_allocator.calloc<VkSubmitInfo>();
+    submit_info->sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
     VkSemaphore wait_semaphores[] = {
 	this->image_available_semaphore->handle
@@ -84,22 +85,22 @@ void Renderer::render() {
     VkPipelineStageFlags wait_stages[] = {
 	VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT
     };
-    submit_info.waitSemaphoreCount = 1;
-    submit_info.pWaitSemaphores = wait_semaphores;
-    submit_info.pWaitDstStageMask = wait_stages;
-    submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers =
+    submit_info->waitSemaphoreCount = 1;
+    submit_info->pWaitSemaphores = wait_semaphores;
+    submit_info->pWaitDstStageMask = wait_stages;
+    submit_info->commandBufferCount = 1;
+    submit_info->pCommandBuffers =
 	&this->command_buffer->handle;
 
     VkSemaphore signal_semaphores[] = {
 	this->render_finished_semaphore->handle
     };
-    submit_info.signalSemaphoreCount = 1;
-    submit_info.pSignalSemaphores = signal_semaphores;
+    submit_info->signalSemaphoreCount = 1;
+    submit_info->pSignalSemaphores = signal_semaphores;
 
     if(vkQueueSubmit(
 	global.vk_global->device->queue_graphics,
-	1, &submit_info,
+	1, submit_info,
 	this->in_flight_fence->handle) != VK_SUCCESS) {
 	log(
 	    "Failed to submit command buffer to graphisc queue",
@@ -107,23 +108,24 @@ void Renderer::render() {
 	std::exit(-1);
     }
 
-    VkPresentInfoKHR present_info {};
-    present_info.sType =
+    VkPresentInfoKHR *present_info =
+	global.frame_allocator.calloc<VkPresentInfoKHR>();
+    present_info->sType =
 	VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    present_info.waitSemaphoreCount = 1;
-    present_info.pWaitSemaphores = signal_semaphores;
+    present_info->waitSemaphoreCount = 1;
+    present_info->pWaitSemaphores = signal_semaphores;
 
     VkSwapchainKHR swapchains[] = {
 	global.vk_global->swapchain->handle	
     };
 
-    present_info.swapchainCount = 1;
-    present_info.pSwapchains = swapchains;
-    present_info.pImageIndices = &image_index;
+    present_info->swapchainCount = 1;
+    present_info->pSwapchains = swapchains;
+    present_info->pImageIndices = &image_index;
 
     result = vkQueuePresentKHR(
 	global.vk_global->device->queue_present,
-	&present_info);
+	present_info);
     if(result == VK_ERROR_OUT_OF_DATE_KHR
 	|| result == VK_SUBOPTIMAL_KHR
 	|| global.platform->window->size_changed) {

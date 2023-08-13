@@ -138,6 +138,20 @@ struct BumpAllocator {
 	return reinterpret_cast<P>(res);
     }
 
+    template<typename T>
+    inline T *alloc() {
+	T* result = this->alloc<T*>(sizeof(T));
+	return result;
+    }
+
+    // For vulkan
+    template<typename T>
+    inline T *calloc() {
+	T* result = this->alloc<T>();
+	*result = {};
+	return result;
+    }
+
     inline void clear() {
 	if(!this->block) {
 	    return;
