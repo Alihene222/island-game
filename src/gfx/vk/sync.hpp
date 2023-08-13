@@ -13,13 +13,10 @@ struct Semaphore {
     ~Semaphore();
 
     Semaphore(const Semaphore &other) = delete;
-
     Semaphore(Semaphore &&other) {
 	*this = std::move(other);
     }
-
     Semaphore &operator=(const Semaphore &other) = delete;
-
     Semaphore &operator=(Semaphore &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
@@ -35,13 +32,10 @@ struct Fence {
     ~Fence();
 
     Fence(const Fence &other) = delete;
-
     Fence(Fence &&other) {
 	*this = std::move(other);
     }
-
     Fence &operator=(const Fence &other) = delete;
-
     Fence &operator=(Fence &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;

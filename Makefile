@@ -4,6 +4,7 @@ INCFLAGS  = -iquotesrc
 INCFLAGS += -Ilib/glfw/include
 INCFLAGS += -Ilib/vulkan
 INCFLAGS += -Ilib/vk_video
+INCFLAGS += -Ilib/glm
 
 CCFLAGS = -std=c++20 -Wall -Wpedantic -Wextra -g -Wno-unused-command-line-argument
 

@@ -5,6 +5,7 @@
 #include "vk/pipeline.hpp"
 #include "vk/command_buffer.hpp"
 #include "vk/sync.hpp"
+#include "vk/vertex_buffer.hpp"
 
 struct Renderer {
     static constexpr u32 layer_count = 1;
@@ -21,30 +22,39 @@ struct Renderer {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
+    static constexpr u32 FRAMES_IN_FLIGHT = 3;
+
     std::unordered_map<
 	std::string,
 	std::shared_ptr<vkn::Pipeline>> pipelines;
 
-    std::unique_ptr<vkn::CommandPool> command_pool;
+    std::array<
+	std::unique_ptr<vkn::CommandBuffer>,
+	FRAMES_IN_FLIGHT> command_buffers;
 
-    std::unique_ptr<vkn::CommandBuffer> command_buffer;
+    std::array<
+	std::unique_ptr<vkn::Semaphore>,
+	FRAMES_IN_FLIGHT> image_available_semaphores;
 
-    std::unique_ptr<vkn::Semaphore> image_available_semaphore;
+    std::array<
+	std::unique_ptr<vkn::Semaphore>,
+	FRAMES_IN_FLIGHT> render_finished_semaphores;
 
-    std::unique_ptr<vkn::Semaphore> render_finished_semaphore;
+    std::array<
+	std::unique_ptr<vkn::Fence>,
+	FRAMES_IN_FLIGHT> in_flight_fences;
 
-    std::unique_ptr<vkn::Fence> in_flight_fence;
+    u32 current_frame = 0;
+
+    std::unique_ptr<vkn::VertexBuffer> vertex_buffer;
 
     Renderer();
 
     ~Renderer();
 
     Renderer(const Renderer &other) = delete;
-
     Renderer(Renderer &&other) = default;
-
     Renderer &operator=(const Renderer &other) = delete;
-
     Renderer &operator=(Renderer &&other) = default;
 
     void render();

@@ -2,6 +2,12 @@
 
 #include "global.hpp"
 
+static const vkn::Vertex vertices[] = {
+    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+    {{0.0f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}
+};
+
 Renderer::Renderer() {
     global.vk_global->instance =
 	std::make_unique<vkn::Instance>();
@@ -18,7 +24,7 @@ Renderer::Renderer() {
     global.vk_global->swapchain =
 	std::make_unique<vkn::Swapchain>(
 	    vkn::Swapchain::SRGB,
-	    vkn::Swapchain::FIFO);
+	    vkn::Swapchain::MAILBOX);
 
     this->pipelines["main"] =
 	std::make_shared<vkn::Pipeline>(
@@ -28,19 +34,25 @@ Renderer::Renderer() {
     global.vk_global->swapchain->create_framebuffers(
 	this->pipelines["main"]->render_pass);
 
-    this->command_pool = std::make_unique<vkn::CommandPool>();
+    global.vk_global->command_pool =
+	std::make_unique<vkn::CommandPool>();
 
-    this->command_buffer =
-	std::make_unique<vkn::CommandBuffer>(
-	    *this->command_pool);
+    for(usize i = 0; i < FRAMES_IN_FLIGHT; i++) {
+	this->command_buffers[i] =
+	    std::make_unique<vkn::CommandBuffer>(
+		*global.vk_global->command_pool);
+	this->image_available_semaphores[i] =
+	    std::make_unique<vkn::Semaphore>();
+	this->render_finished_semaphores[i] =
+	    std::make_unique<vkn::Semaphore>();
+	this->in_flight_fences[i] =
+	    std::make_unique<vkn::Fence>();
+    }
 
-    this->image_available_semaphore =
-	std::make_unique<vkn::Semaphore>();
-
-    this->render_finished_semaphore =
-	std::make_unique<vkn::Semaphore>();
-
-    this->in_flight_fence = std::make_unique<vkn::Fence>();
+    this->vertex_buffer =
+	std::make_unique<vkn::VertexBuffer>(
+	    (void*) vertices,
+	    sizeof(vertices));
 }
 
 Renderer::~Renderer() {
@@ -48,15 +60,16 @@ Renderer::~Renderer() {
 }
 
 void Renderer::render() {
-    this->in_flight_fence->wait();
-    this->in_flight_fence->reset();
+    this->in_flight_fences[this->current_frame]->wait();
+    this->in_flight_fences[this->current_frame]->reset();
 
     u32 image_index;
     VkResult result = vkAcquireNextImageKHR(
 	global.vk_global->device->handle,
 	global.vk_global->swapchain->handle,
 	UINT64_MAX,
-	this->image_available_semaphore->handle,
+	this->image_available_semaphores
+	    [this->current_frame]->handle,
 	VK_NULL_HANDLE,
 	&image_index);
 
@@ -69,10 +82,10 @@ void Renderer::render() {
 	std::exit(-1);
     }
 
-    this->in_flight_fence->reset();
+    this->in_flight_fences[this->current_frame]->reset();
 
-    this->command_buffer->reset();
-    this->command_buffer->record(
+    this->command_buffers[this->current_frame]->reset();
+    this->command_buffers[this->current_frame]->record(
 	image_index, this->pipelines["main"]);
 
     VkSubmitInfo *submit_info =
@@ -80,7 +93,8 @@ void Renderer::render() {
     submit_info->sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
     VkSemaphore wait_semaphores[] = {
-	this->image_available_semaphore->handle
+	this->image_available_semaphores
+	    [this->current_frame]->handle
     };
     VkPipelineStageFlags wait_stages[] = {
 	VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT
@@ -90,10 +104,11 @@ void Renderer::render() {
     submit_info->pWaitDstStageMask = wait_stages;
     submit_info->commandBufferCount = 1;
     submit_info->pCommandBuffers =
-	&this->command_buffer->handle;
+	&this->command_buffers[this->current_frame]->handle;
 
     VkSemaphore signal_semaphores[] = {
-	this->render_finished_semaphore->handle
+	this->render_finished_semaphores
+	    [this->current_frame]->handle
     };
     submit_info->signalSemaphoreCount = 1;
     submit_info->pSignalSemaphores = signal_semaphores;
@@ -101,7 +116,8 @@ void Renderer::render() {
     if(vkQueueSubmit(
 	global.vk_global->device->queue_graphics,
 	1, submit_info,
-	this->in_flight_fence->handle) != VK_SUCCESS) {
+	this->in_flight_fences
+	    [this->current_frame]->handle) != VK_SUCCESS) {
 	log(
 	    "Failed to submit command buffer to graphisc queue",
 	    LOG_LEVEL_ERROR);
@@ -138,4 +154,6 @@ void Renderer::render() {
 	    LOG_LEVEL_ERROR);
 	std::exit(-1);
     }
+
+    current_frame = (current_frame + 1) % FRAMES_IN_FLIGHT;
 }

@@ -15,13 +15,10 @@ struct CommandPool {
     ~CommandPool();
 
     CommandPool(const CommandPool &other) = delete;
-
     CommandPool(CommandPool &&other) {
 	*this = std::move(other);
     }
-
     CommandPool &operator=(const CommandPool &other) = delete;
-
     CommandPool &operator=(CommandPool &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
@@ -35,15 +32,11 @@ struct CommandBuffer {
     explicit CommandBuffer(const CommandPool &pool);
 
     ~CommandBuffer() = default;
-
     CommandBuffer(const CommandBuffer &other) = delete;
-
     CommandBuffer(CommandBuffer &&other) {
 	*this = std::move(other);
     }
-
     CommandBuffer &operator=(const CommandBuffer &other) = delete;
-
     CommandBuffer &operator=(CommandBuffer &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;

@@ -165,8 +165,8 @@ void vkn::Swapchain::adapt(VkRenderPass render_pass) {
     i32 height = std::get<1>(tuple);
     if(width == 0 || height == 0) {
 	tuple = global.platform->window->get_size();
-	i32 width = std::get<0>(tuple);
-	i32 height = std::get<1>(tuple);
+	width = std::get<0>(tuple);
+	height = std::get<1>(tuple);
 	glfwWaitEvents();
     }
 
@@ -280,12 +280,12 @@ void vkn::Swapchain::choose_extent(
 	this->extent = capabilities.currentExtent;
     } else {
 	std::tuple tuple = global.platform->window->get_size();
-	u32 width = static_cast<u32>(std::get<0>(tuple));
-	u32 height = static_cast<u32>(std::get<1>(tuple));
+	i32 width = std::get<0>(tuple);
+	i32 height = std::get<1>(tuple);
 
 	VkExtent2D actual_extent = {
-	    width,
-	    height
+	    static_cast<u32>(width),
+	    static_cast<u32>(height)
 	};
 
 	actual_extent.width = std::clamp(

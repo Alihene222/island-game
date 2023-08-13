@@ -17,13 +17,10 @@ struct Pipeline {
     ~Pipeline();
 
     Pipeline(const Pipeline &other) = delete;
-
     Pipeline(Pipeline &&other) {
 	*this = std::move(other);
     }
-
     Pipeline &operator=(const Pipeline &other) = delete;
-
     Pipeline &operator=(Pipeline &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;

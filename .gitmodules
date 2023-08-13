@@ -2,3 +2,7 @@
 	path = lib/glfw
 	url = https://github.com/glfw/glfw
 	branch = master
+[submodule "glm"]
+	path = lib/glm
+	url = https://github.com/g-truc/glm
+	branch = master

@@ -44,12 +44,10 @@ struct Swapchain {
     ~Swapchain();
 
     Swapchain(const Swapchain &other) = delete;
-
     Swapchain(Swapchain &&other) {
 	*this = std::move(other);
     }
     Swapchain &operator=(const Swapchain &other) = delete;
-
     Swapchain &operator=(Swapchain &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;

@@ -6,4 +6,6 @@ lib/vulkan
 lib/vk_video
 -I
 lib/glfw/include
+-I
+lib/glm
 -std=c++20

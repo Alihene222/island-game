@@ -37,6 +37,9 @@ GLFWWindow::GLFWWindow(std::string name, u16 width, u16 height)
     }
 
     glfwSetWindowUserPointer(this->window, this);
+    glfwSetFramebufferSizeCallback(
+	this->window,
+	framebuffer_size_callback);
 }
 
 GLFWWindow::~GLFWWindow() {

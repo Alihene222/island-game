@@ -2,6 +2,7 @@
 
 #include "util/util.hpp"
 #include "global.hpp"
+#include "vertex_buffer.hpp"
 
 static std::vector<char> read_shader_file(
     const std::string &path) {
@@ -70,8 +71,10 @@ vkn::Pipeline::Pipeline(std::string vs_path, std::string fs_path) {
     const std::vector<char> vs_code = read_shader_file(vs_path);
     const std::vector<char> fs_code = read_shader_file(fs_path);
 
-    VkShaderModule vs_module = this->create_shader_module(vs_code);
-    VkShaderModule fs_module = this->create_shader_module(fs_code);
+    VkShaderModule vs_module =
+	this->create_shader_module(vs_code);
+    VkShaderModule fs_module =
+	this->create_shader_module(fs_code);
 
     VkPipelineShaderStageCreateInfo vs_stage_info {};
     vs_stage_info.sType =
@@ -103,14 +106,22 @@ vkn::Pipeline::Pipeline(std::string vs_path, std::string fs_path) {
     dynamic_state_info.dynamicStateCount = dynamic_states.size();
     dynamic_state_info.pDynamicStates = &dynamic_states[0];
 
+    auto binding_description =
+	vkn::Vertex::get_binding_description();
+    auto attribute_descriptions =
+	vkn::Vertex::get_attribute_descriptions();
+
     // TODO: vertex buffers
     VkPipelineVertexInputStateCreateInfo vertex_input_info {};
     vertex_input_info.sType =
 	VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertex_input_info.vertexAttributeDescriptionCount = 0;
-    vertex_input_info.vertexBindingDescriptionCount = 0;
-    vertex_input_info.pVertexAttributeDescriptions = nullptr;
-    vertex_input_info.pVertexBindingDescriptions = nullptr;
+    vertex_input_info.vertexAttributeDescriptionCount =
+	attribute_descriptions.size();
+    vertex_input_info.vertexBindingDescriptionCount = 1;
+    vertex_input_info.pVertexAttributeDescriptions =
+	&attribute_descriptions[0];
+    vertex_input_info.pVertexBindingDescriptions =
+	&binding_description;
 
     VkPipelineInputAssemblyStateCreateInfo assembly_info {};
     assembly_info.sType =

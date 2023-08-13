@@ -101,6 +101,17 @@ void vkn::CommandBuffer::record(
     scissor.extent = global.vk_global->swapchain->extent;
     vkCmdSetScissor(this->handle, 0, 1, &scissor);
 
+    VkBuffer vertex_buffers[] = {
+	global.renderer->vertex_buffer->handle
+    };
+    VkDeviceSize offsets[] = {0};
+
+    vkCmdBindVertexBuffers(
+	this->handle,
+	0, 1,
+	vertex_buffers,
+	offsets);
+
     vkCmdDraw(this->handle, 3, 1, 0, 0);
 
     vkCmdEndRenderPass(this->handle);
