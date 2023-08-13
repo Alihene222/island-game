@@ -4,6 +4,7 @@
 #include "util/util.hpp"
 #include "vk/pipeline.hpp"
 #include "vk/command_buffer.hpp"
+#include "vk/sync.hpp"
 
 struct Renderer {
     static constexpr u32 layer_count = 1;
@@ -27,6 +28,12 @@ struct Renderer {
     std::unique_ptr<vkn::CommandPool> command_pool;
 
     std::unique_ptr<vkn::CommandBuffer> command_buffer;
+
+    std::unique_ptr<vkn::Semaphore> image_available_semaphore;
+
+    std::unique_ptr<vkn::Semaphore> render_finished_semaphore;
+
+    std::unique_ptr<vkn::Fence> in_flight_fence;
 
     Renderer();
 

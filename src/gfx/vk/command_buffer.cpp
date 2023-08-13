@@ -112,3 +112,7 @@ void vkn::CommandBuffer::record(
 	std::exit(-1);
     }
 }
+
+void vkn::CommandBuffer::reset() {
+    vkResetCommandBuffer(this->handle, 0);
+}

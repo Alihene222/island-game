@@ -3,11 +3,10 @@
 #include "global.hpp"
 
 StateGame::StateGame() {
-    this->init();
 }
 
 StateGame::~StateGame() {
-    this->destroy();
+
 }
 
 void StateGame::init() {

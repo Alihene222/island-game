@@ -53,6 +53,8 @@ struct CommandBuffer {
     void record(
 	u32 image_index,
 	std::shared_ptr<vkn::Pipeline> pipeline);
+
+    void reset();
 };
 
 }
