@@ -18,7 +18,7 @@ Renderer::Renderer() {
     global.vk_global->swapchain =
 	std::make_unique<vkn::Swapchain>(
 	    vkn::Swapchain::SRGB,
-	    vkn::Swapchain::MAILBOX);
+	    vkn::Swapchain::FIFO);
 
     this->pipelines["main"] =
 	std::make_shared<vkn::Pipeline>(
