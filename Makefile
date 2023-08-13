@@ -51,4 +51,5 @@ build: dirs shaders $(OBJ)
 clean:
 	rm -rf $(BIN)
 	rm -rf $(OBJ)
+	rm -rf $(SHADERS_OUT)
 	rm -rf lib/glfw/CMakeCache.txt

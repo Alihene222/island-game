@@ -3,6 +3,7 @@
 #include "gfx.hpp"
 #include "util/util.hpp"
 #include "vk/pipeline.hpp"
+#include "vk/command_buffer.hpp"
 
 struct Renderer {
     static constexpr u32 layer_count = 1;
@@ -21,7 +22,11 @@ struct Renderer {
 
     std::unordered_map<
 	std::string,
-	std::unique_ptr<vkn::Pipeline>> pipelines;
+	std::shared_ptr<vkn::Pipeline>> pipelines;
+
+    std::unique_ptr<vkn::CommandPool> command_pool;
+
+    std::unique_ptr<vkn::CommandBuffer> command_buffer;
 
     Renderer();
 

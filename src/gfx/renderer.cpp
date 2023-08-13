@@ -21,12 +21,18 @@ Renderer::Renderer() {
 	    vkn::Swapchain::MAILBOX);
 
     this->pipelines["main"] =
-	std::make_unique<vkn::Pipeline>(
+	std::make_shared<vkn::Pipeline>(
 	    "res/shaders/basic.vert.spirv",
 	    "res/shaders/basic.frag.spirv");
 
     global.vk_global->swapchain->create_framebuffers(
 	this->pipelines["main"]->render_pass);
+
+    this->command_pool = std::make_unique<vkn::CommandPool>();
+
+    this->command_buffer =
+	std::make_unique<vkn::CommandBuffer>(
+	    *this->command_pool);
 }
 
 Renderer::~Renderer() {
