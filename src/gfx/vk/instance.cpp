@@ -4,10 +4,10 @@
 #include "gfx/renderer.hpp"
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-    VkDebugUtilsMessageTypeFlagsEXT message_type,
+    UNUSED VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+    UNUSED VkDebugUtilsMessageTypeFlagsEXT message_type,
     const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-    void* user_data) {
+    UNUSED void* user_data) {
     log(
 	"Vulkan: "
 	+ std::string(callback_data->pMessage),

@@ -2,11 +2,7 @@
 
 #include "global.hpp"
 
-Renderer::~Renderer() {
-
-}
-
-void Renderer::init() {
+Renderer::Renderer() {
     global.vk_global->instance =
 	std::make_unique<vkn::Instance>();
 
@@ -23,6 +19,18 @@ void Renderer::init() {
 	std::make_unique<vkn::Swapchain>(
 	    vkn::Swapchain::SRGB,
 	    vkn::Swapchain::MAILBOX);
+
+    this->pipelines["main"] =
+	std::make_unique<vkn::Pipeline>(
+	    "res/shaders/basic.vert.spirv",
+	    "res/shaders/basic.frag.spirv");
+
+    global.vk_global->swapchain->create_framebuffers(
+	this->pipelines["main"]->render_pass);
+}
+
+Renderer::~Renderer() {
+
 }
 
 void Renderer::render() {

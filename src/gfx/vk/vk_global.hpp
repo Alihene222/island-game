@@ -7,7 +7,7 @@
 #include "swapchain.hpp"
 
 struct VkGlobal {
-    std::unique_ptr<vkn::Instance> instance;
+    std::shared_ptr<vkn::Instance> instance;
     
     VkSurfaceKHR surface;
 

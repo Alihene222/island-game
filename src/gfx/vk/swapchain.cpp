@@ -105,14 +105,49 @@ vkn::Swapchain::Swapchain(
 }
 
 vkn::Swapchain::~Swapchain() {
+    for(const auto &framebuffer : this->framebuffers) {
+	vkDestroyFramebuffer(
+	    global.vk_global->device->handle,
+	    framebuffer, nullptr);
+    }
+
     for(const auto &image_view : this->image_views) {
 	vkDestroyImageView(
 	    global.vk_global->device->handle,
 	    image_view, nullptr);
     }
+
     vkDestroySwapchainKHR(
 	global.vk_global->device->handle,
 	this->handle, nullptr);
+}
+
+void vkn::Swapchain::create_framebuffers(
+    VkRenderPass render_pass) {
+    this->framebuffers.resize(this->image_views.size());
+    for(u64 i = 0; i < this->image_views.size(); i++) {
+	VkImageView attachments[] = {
+	    this->image_views[i]
+	};
+
+	VkFramebufferCreateInfo create_info {};
+	create_info.sType =
+	    VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	create_info.renderPass = render_pass;
+	create_info.attachmentCount = 1;
+	create_info.pAttachments = attachments;
+	create_info.width = this->extent.width;
+	create_info.height = this->extent.height;
+	create_info.layers = 1;
+
+	if(vkCreateFramebuffer(
+	    global.vk_global->device->handle,
+	    &create_info, nullptr,
+	    &this->framebuffers[i]) != VK_SUCCESS) {
+	    log("Failed to create framebuffers", LOG_LEVEL_FATAL);
+	    std::exit(-1);
+	}
+    }
 }
 
 vkn::SwapchainSupportDetails vkn::Swapchain::query_support(

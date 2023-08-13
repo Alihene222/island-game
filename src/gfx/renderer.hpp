@@ -1,10 +1,8 @@
 #pragma once
 
 #include "gfx.hpp"
-#include "vk/instance.hpp"
-#include "vk/physical_device.hpp"
-#include "vk/device.hpp"
-#include "vk/swapchain.hpp"
+#include "util/util.hpp"
+#include "vk/pipeline.hpp"
 
 struct Renderer {
     static constexpr u32 layer_count = 1;
@@ -21,7 +19,11 @@ struct Renderer {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
-    Renderer() = default;
+    std::unordered_map<
+	std::string,
+	std::unique_ptr<vkn::Pipeline>> pipelines;
+
+    Renderer();
 
     ~Renderer();
 
@@ -33,6 +35,5 @@ struct Renderer {
 
     Renderer &operator=(Renderer &&other) = default;
 
-    void init();
     void render();
 };

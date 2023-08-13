@@ -2,7 +2,9 @@
 
 #include "global.hpp"
 
-static void glfw_error_callback(int err, const char *msg) {
+static void glfw_error_callback(
+    UNUSED int err,
+    const char *msg) {
     log(std::string(msg), LOG_LEVEL_FATAL);
 }
 

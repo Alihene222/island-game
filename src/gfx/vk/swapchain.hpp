@@ -2,6 +2,7 @@
 
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
+#include "pipeline.hpp"
 
 namespace vkn {
 
@@ -61,7 +62,7 @@ struct Swapchain {
 	return *this;
     }
 
-    void create_framebuffers();
+    void create_framebuffers(VkRenderPass render_pass);
 
 private:
     SwapchainSupportDetails query_support(

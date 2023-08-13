@@ -1,2 +1,4 @@
 build/
 *.o
+*.vert.spirv
+*.frag.spirv

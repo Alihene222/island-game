@@ -13,14 +13,12 @@ int main(UNUSED int agc, UNUSED char **argv) {
     Timer timer;
     global.timer = &timer;
 
-    Renderer renderer;
-    global.renderer = &renderer;
-
     // Global vulkan state. Initialized in Renderer
     VkGlobal vk_global;
     global.vk_global = &vk_global;
 
-    renderer.init();
+    Renderer renderer;
+    global.renderer = &renderer;
 
     StateGame game;
     global.game = &game;
