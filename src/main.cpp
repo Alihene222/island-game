@@ -5,6 +5,8 @@ Global global;
 int main(UNUSED int agc, UNUSED char **argv) {
     global.debug = true;
 
+    global.frame_allocator = BumpAllocator(16384);
+
     Platform platform;
     platform.window = std::make_unique<GLFWWindow>(
 	"Hello, World!", 800, 600);
@@ -37,6 +39,7 @@ int main(UNUSED int agc, UNUSED char **argv) {
 	global.state->render();
 	timer.frames++;
 
+	global.frame_allocator.clear();
 	platform.window->end_frame();
     }
 

@@ -6,6 +6,7 @@
 #include "gfx/vk/vk_global.hpp"
 #include "state.hpp"
 #include "state_game.hpp"
+#include "util/bump_allocator.hpp"
 
 struct Renderer;
 
@@ -19,6 +20,9 @@ struct Global {
 
     // Current state
     State *state;
+
+    // Per-frame allocations
+    BumpAllocator frame_allocator;
 
     // Possible states
     StateGame *game;
