@@ -64,7 +64,13 @@ struct Swapchain {
 
     void create_framebuffers(VkRenderPass render_pass);
 
+    void adapt(VkRenderPass render_pass);
+
 private:
+    void create();
+
+    void destroy();
+
     SwapchainSupportDetails query_support(
 	VkPhysicalDevice device) const;
 

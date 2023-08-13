@@ -8,6 +8,14 @@ static void glfw_error_callback(
     log(std::string(msg), LOG_LEVEL_FATAL);
 }
 
+static void framebuffer_size_callback(
+    GLFWwindow *w,
+    UNUSED i32 width,
+    UNUSED i32 height) {
+    GLFWWindow *window = reinterpret_cast<GLFWWindow*>(w);
+    window->size_changed = true;
+}
+
 GLFWWindow::GLFWWindow(std::string name, u16 width, u16 height)
     : width(width),
     height(height) {
@@ -27,6 +35,8 @@ GLFWWindow::GLFWWindow(std::string name, u16 width, u16 height)
 	    "Failed to create window", LOG_LEVEL_FATAL);
 	std::exit(-1);
     }
+
+    glfwSetWindowUserPointer(this->window, this);
 }
 
 GLFWWindow::~GLFWWindow() {

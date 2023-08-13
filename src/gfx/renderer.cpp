@@ -52,13 +52,22 @@ void Renderer::render() {
     this->in_flight_fence->reset();
 
     u32 image_index;
-    vkAcquireNextImageKHR(
+    VkResult result = vkAcquireNextImageKHR(
 	global.vk_global->device->handle,
 	global.vk_global->swapchain->handle,
 	UINT64_MAX,
 	this->image_available_semaphore->handle,
 	VK_NULL_HANDLE,
 	&image_index);
+
+    if(result == VK_ERROR_OUT_OF_DATE_KHR) {
+	global.vk_global->swapchain->adapt(
+	    this->pipelines["main"]->render_pass);
+    } else if(result != VK_SUCCESS
+	&& result != VK_SUBOPTIMAL_KHR) {
+	log("Failed to adapt swapchain", LOG_LEVEL_ERROR);
+	std::exit(-1);
+    }
 
     this->in_flight_fence->reset();
 
@@ -112,11 +121,16 @@ void Renderer::render() {
     present_info.pSwapchains = swapchains;
     present_info.pImageIndices = &image_index;
 
-    VkResult result = vkQueuePresentKHR(
+    result = vkQueuePresentKHR(
 	global.vk_global->device->queue_present,
 	&present_info);
-
-    if(result != VK_SUCCESS) {
+    if(result == VK_ERROR_OUT_OF_DATE_KHR
+	|| result == VK_SUBOPTIMAL_KHR
+	|| global.platform->window->size_changed) {
+	global.vk_global->swapchain->adapt(
+	    this->pipelines["main"]->render_pass);
+	    global.platform->window->size_changed = false;
+    } else if(result != VK_SUCCESS) {
 	log(
 	    "Failed to submit command buffer to present queue",
 	    LOG_LEVEL_ERROR);

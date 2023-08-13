@@ -18,6 +18,8 @@ struct GLFWWindow {
 
     f32 aspect_ratio;
 
+    bool size_changed = false;
+
     GLFWWindow(std::string name, u16 width, u16 height);
 
     ~GLFWWindow();

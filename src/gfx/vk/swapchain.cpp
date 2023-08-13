@@ -7,6 +7,14 @@ vkn::Swapchain::Swapchain(
     PresentMode preferred_present_mode)
     : preferred_color_space(preferred_color_space),
       preferred_present_mode(preferred_present_mode) {
+    this->create();
+}
+
+vkn::Swapchain::~Swapchain() {
+    this->destroy();
+}
+
+void vkn::Swapchain::create() {
     SwapchainSupportDetails support_details =
 	this->query_support(global.vk_global->physical_device);
     this->choose_surface_format(support_details.formats);
@@ -104,7 +112,7 @@ vkn::Swapchain::Swapchain(
     }
 }
 
-vkn::Swapchain::~Swapchain() {
+void vkn::Swapchain::destroy() {
     for(const auto &framebuffer : this->framebuffers) {
 	vkDestroyFramebuffer(
 	    global.vk_global->device->handle,
@@ -148,6 +156,26 @@ void vkn::Swapchain::create_framebuffers(
 	    std::exit(-1);
 	}
     }
+}
+
+void vkn::Swapchain::adapt(VkRenderPass render_pass) {
+    std::tuple<i32, i32> tuple =
+	global.platform->window->get_size();
+    i32 width = std::get<0>(tuple);
+    i32 height = std::get<1>(tuple);
+    if(width == 0 || height == 0) {
+	tuple = global.platform->window->get_size();
+	i32 width = std::get<0>(tuple);
+	i32 height = std::get<1>(tuple);
+	glfwWaitEvents();
+    }
+
+    global.vk_global->device->wait_idle();
+
+    this->destroy();
+
+    this->create();
+    this->create_framebuffers(render_pass);
 }
 
 vkn::SwapchainSupportDetails vkn::Swapchain::query_support(
