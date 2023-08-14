@@ -1,20 +1,19 @@
 #pragma once
 
+#include <vk_mem_alloc.h>
+
 #include "gfx/gfx.hpp"
 #include "util/util.hpp"
 
 namespace vkn {
 
-u32 find_memory_type(
-    u32 type_filter,
-    VkMemoryPropertyFlags properties);
-
 void make_buffer(
     VkDeviceSize size,
     VkBufferUsageFlags usage,
-    VkMemoryPropertyFlags properties,
+    i32 flags,
     VkBuffer *buffer,
-    VkDeviceMemory *memory);
+    VmaAllocation *alloc,
+    f32 priority);
 
 void copy_buffer(VkBuffer src, VkBuffer dst, VkDeviceSize size);
 

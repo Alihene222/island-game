@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vk_mem_alloc.h>
+
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
 #include "util/util.hpp"
@@ -8,7 +10,8 @@ namespace vkn {
 
 struct UniformBuffer {
     VkBuffer handle;
-    VkDeviceMemory memory;
+
+    VmaAllocation alloc;
 
     void *data;
 
@@ -25,8 +28,8 @@ struct UniformBuffer {
     UniformBuffer &operator=(UniformBuffer &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
-	this->memory = other.memory;
-	other.memory = VK_NULL_HANDLE;
+	this->alloc = other.alloc;
+	other.alloc = VK_NULL_HANDLE;
 	this->data = other.data;
 	other.data = nullptr;
 	return *this;

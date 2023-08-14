@@ -71,7 +71,7 @@ vkn::Instance::Instance() {
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    app_info.apiVersion = VK_API_VERSION_1_1;
+    app_info.apiVersion = VK_API_VERSION_1_3;
 
     VkInstanceCreateInfo create_info {};
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -92,12 +92,14 @@ vkn::Instance::Instance() {
 	static_cast<u32>(extensions.size());
     create_info.ppEnabledExtensionNames = extensions.data();
 
+    // For instance creation
+    VkDebugUtilsMessengerCreateInfoEXT dbg_create_info_pnext;
     if(global.debug) {
 	create_info.enabledLayerCount = Renderer::layer_count;
 	create_info.ppEnabledLayerNames = &Renderer::layers[0];
 
-	auto dbg_create_info = make_debug_messenger_create_info();
-	create_info.pNext = &dbg_create_info;
+	dbg_create_info_pnext = make_debug_messenger_create_info();
+	create_info.pNext = &dbg_create_info_pnext;
     } else {
 	create_info.enabledLayerCount = 0;
 	create_info.pNext = nullptr;

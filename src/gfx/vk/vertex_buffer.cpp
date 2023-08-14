@@ -35,59 +35,42 @@ std::array<VkVertexInputAttributeDescription, 2>
     return attribute_descriptions;
 }
 
-vkn::VertexBuffer::VertexBuffer(void *data, usize data_size) {
-    VkDeviceSize size = data_size;
-
+vkn::VertexBuffer::VertexBuffer(void *data, usize size) {
     VkBuffer staging_buffer;
-    VkDeviceMemory staging_memory;
+    VmaAllocation staging_alloc;
 
     vkn::make_buffer(
 	size,
 	VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-	| VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+	VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,
 	&staging_buffer,
-	&staging_memory);
+	&staging_alloc,
+	0.0f);
 
     void *buf_data;
-    vkMapMemory(
-	global.vk_global->device->handle,
-	staging_memory,
-	0,
-	size,
-	0,
+    vmaMapMemory(
+	global.vk_global->allocator->handle,
+	staging_alloc,
 	&buf_data);
     std::memcpy(buf_data, data, size);
-    vkUnmapMemory(
-	global.vk_global->device->handle,
-	staging_memory);
+    vmaUnmapMemory(
+	global.vk_global->allocator->handle,
+	staging_alloc);
 
     vkn::make_buffer(
 	size,
 	VK_BUFFER_USAGE_TRANSFER_DST_BIT
 	| VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+	VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT,
 	&this->handle,
-	&this->memory);
+	&this->alloc,
+	1.0f);
+    global.vk_global->allocator->add_entry(
+	this->handle, this->alloc);
     vkn::copy_buffer(staging_buffer, this->handle, size);
 
-    vkDestroyBuffer(
-	global.vk_global->device->handle,
+    vmaDestroyBuffer(
+	global.vk_global->allocator->handle,
 	staging_buffer,
-	nullptr);
-    vkFreeMemory(
-	global.vk_global->device->handle,
-	staging_memory,
-	nullptr);
-}
-
-vkn::VertexBuffer::~VertexBuffer() {
-    vkDestroyBuffer(
-	global.vk_global->device->handle,
-	this->handle,
-	nullptr);
-    vkFreeMemory(
-	global.vk_global->device->handle,
-	this->memory,
-	nullptr);
+	staging_alloc);
 }

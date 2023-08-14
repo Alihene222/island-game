@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <vk_mem_alloc.h>
 
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
@@ -23,12 +24,12 @@ struct Vertex {
 struct VertexBuffer {
     VkBuffer handle;
 
-    VkDeviceMemory memory;
+    VmaAllocation alloc;
 
     VertexBuffer() = default;
-    VertexBuffer(void *data, usize data_size);
+    VertexBuffer(void *data, usize size);
 
-    ~VertexBuffer();
+    ~VertexBuffer() = default;
 
     VertexBuffer(const VertexBuffer &other) = delete;
     VertexBuffer(VertexBuffer &&other) {
@@ -38,8 +39,8 @@ struct VertexBuffer {
     VertexBuffer &operator=(VertexBuffer &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
-	this->memory = other.memory;
-	other.memory = VK_NULL_HANDLE;
+	this->alloc = other.alloc;
+	other.alloc = VK_NULL_HANDLE;
 	return *this;
     }
 };

@@ -4,6 +4,9 @@
 
 #include "global.hpp"
 
+#define VMA_IMPLEMENTATION
+#include "vk_mem_alloc.h"
+
 static const vkn::Vertex vertices[] = {
     {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
     {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
@@ -23,10 +26,13 @@ Renderer::Renderer() {
     global.vk_global->device =
 	std::make_unique<vkn::Device>();
 
+    global.vk_global->allocator =
+	std::make_unique<vkn::Allocator>();
+
     global.vk_global->swapchain =
 	std::make_unique<vkn::Swapchain>(
 	    vkn::Swapchain::SRGB,
-	    vkn::Swapchain::MAILBOX);
+	    vkn::Swapchain::FIFO);
 
     this->descriptor_set_layout =
 	std::make_unique<vkn::DescriptorSetLayout>(
@@ -82,6 +88,8 @@ Renderer::Renderer() {
 
 Renderer::~Renderer() {
     global.vk_global->device->wait_idle();
+
+    this->vertex_buffer.reset();
 }
 
 void Renderer::render() {

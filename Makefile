@@ -5,8 +5,12 @@ INCFLAGS += -Ilib/glfw/include
 INCFLAGS += -Ilib/vulkan
 INCFLAGS += -Ilib/vk_video
 INCFLAGS += -Ilib/glm
+INCFLAGS += -Ilib/vma
 
-CCFLAGS = -O3 -std=c++20 -Wall -Wpedantic -Wextra -Wno-unused-command-line-argument
+CCFLAGS  = -O2 -g -std=c++20 -Wall -Wpedantic -Wextra
+CCFLAGS += -Wno-unused-command-line-argument
+CCFLAGS += -Wno-nullability-extension
+CCFLAGS += -Wno-nullability-completeness
 
 LDFLAGS  = lib/glfw/build/src/libglfw3.a
 LDFLAGS += -lvulkan

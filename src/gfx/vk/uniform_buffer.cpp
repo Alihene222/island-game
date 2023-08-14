@@ -4,32 +4,26 @@
 #include "global.hpp"
 
 vkn::UniformBuffer::UniformBuffer(usize size) {
-    VkDeviceSize buffer_size = size;
-
     vkn::make_buffer(
 	size,
 	VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-	| VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+	VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,
 	&this->handle,
-	&this->memory);
+	&this->alloc,
+	0.0f);
+    global.vk_global->allocator->add_entry(
+	this->handle, this->alloc);
 
-    vkMapMemory(
-	global.vk_global->device->handle,
-	this->memory, 0,
-	buffer_size, 0,
+    vmaMapMemory(
+	global.vk_global->allocator->handle,
+	this->alloc,
 	&this->data);
 }
 
 vkn::UniformBuffer::~UniformBuffer() {
-    vkDestroyBuffer(
-	global.vk_global->device->handle,
-	this->handle,
-	nullptr);
-    vkFreeMemory(
-	global.vk_global->device->handle,
-	this->memory,
-	nullptr);
+    vmaUnmapMemory(
+	global.vk_global->allocator->handle,
+	this->alloc);	
 }
 
 vkn::DescriptorSetLayout::DescriptorSetLayout(

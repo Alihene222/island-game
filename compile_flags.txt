@@ -8,4 +8,6 @@ lib/vk_video
 lib/glfw/include
 -I
 lib/glm
+-I
+lib/vma
 -std=c++20

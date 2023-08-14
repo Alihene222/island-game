@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vk_mem_alloc.h>
+
 #include "gfx.hpp"
 #include "util/util.hpp"
 #include "vk/pipeline.hpp"

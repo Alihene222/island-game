@@ -6,6 +6,7 @@
 #include "device.hpp"
 #include "swapchain.hpp"
 #include "command_buffer.hpp"
+#include "allocator.hpp"
 
 struct VkGlobal {
     std::unique_ptr<vkn::Instance> instance;
@@ -20,12 +21,15 @@ struct VkGlobal {
 
     std::unique_ptr<vkn::CommandPool> command_pool;
 
+    std::unique_ptr<vkn::Allocator> allocator;
+
     VkGlobal() = default;
 
     ~VkGlobal() {
 	this->swapchain.reset();
 	vkDestroySurfaceKHR(
 	    this->instance->handle, this->surface, nullptr);
+	allocator.reset();
     };
 
     VkGlobal(const VkGlobal &other) = delete;
