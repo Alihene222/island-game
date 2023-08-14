@@ -48,36 +48,40 @@ vkn::CommandBuffer::CommandBuffer(const CommandPool &pool) {
 void vkn::CommandBuffer::record(
     u32 image_index,
     std::shared_ptr<vkn::Pipeline> pipeline) {
-    VkCommandBufferBeginInfo begin_info {};
-    begin_info.sType =
+    VkCommandBufferBeginInfo *begin_info =
+	global.frame_allocator.calloc<VkCommandBufferBeginInfo>();
+    begin_info->sType =
 	VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
     if(vkBeginCommandBuffer(
 	this->handle,
-	&begin_info) != VK_SUCCESS) {
+	begin_info) != VK_SUCCESS) {
 	log(
 	    "Failed to begin recording command buffer",
 	    LOG_LEVEL_ERROR);
 	std::exit(-1);
     }
 
-    VkRenderPassBeginInfo render_pass_info {};
-    render_pass_info.sType =
+    VkRenderPassBeginInfo *render_pass_info =
+	global.frame_allocator.calloc<VkRenderPassBeginInfo>();
+    render_pass_info->sType =
 	VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    render_pass_info.renderPass = pipeline->render_pass;
-    render_pass_info.framebuffer =
+    render_pass_info->renderPass = pipeline->render_pass;
+    render_pass_info->framebuffer =
 	global.vk_global->swapchain->framebuffers[image_index];
-    render_pass_info.renderArea.offset = { 0, 0 };
-    render_pass_info.renderArea.extent =
+    render_pass_info->renderArea.offset = { 0, 0 };
+    render_pass_info->renderArea.extent =
 	global.vk_global->swapchain->extent;
 
-    VkClearValue clear_color = {{{ 0.0f, 0.0f, 0.0f, 1.0f }}};
-    render_pass_info.clearValueCount = 1;
-    render_pass_info.pClearValues = &clear_color;
+    VkClearValue *clear_color =
+	global.frame_allocator.alloc<VkClearValue>();
+    *clear_color = {{{ 0.0f, 0.0f, 0.0f, 1.0f }}};
+    render_pass_info->clearValueCount = 1;
+    render_pass_info->pClearValues = clear_color;
 
     vkCmdBeginRenderPass(
 	this->handle,
-	&render_pass_info,
+	render_pass_info,
 	VK_SUBPASS_CONTENTS_INLINE);
 
     vkCmdBindPipeline(
@@ -85,21 +89,21 @@ void vkn::CommandBuffer::record(
 	VK_PIPELINE_BIND_POINT_GRAPHICS,
 	pipeline->handle);
 
-    VkViewport viewport {};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width =
+    VkViewport *viewport = global.frame_allocator.calloc<VkViewport>();
+    viewport->x = 0.0f;
+    viewport->y = 0.0f;
+    viewport->width =
 	global.vk_global->swapchain->extent.width;
-    viewport.height =
+    viewport->height =
 	global.vk_global->swapchain->extent.height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(this->handle, 0, 1, &viewport);
+    viewport->minDepth = 0.0f;
+    viewport->maxDepth = 1.0f;
+    vkCmdSetViewport(this->handle, 0, 1, viewport);
 
-    VkRect2D scissor {};
-    scissor.offset = { 0, 0 };
-    scissor.extent = global.vk_global->swapchain->extent;
-    vkCmdSetScissor(this->handle, 0, 1, &scissor);
+    VkRect2D *scissor = global.frame_allocator.calloc<VkRect2D>();
+    scissor->offset = { 0, 0 };
+    scissor->extent = global.vk_global->swapchain->extent;
+    vkCmdSetScissor(this->handle, 0, 1, scissor);
 
     VkBuffer vertex_buffers[] = {
 	global.renderer->vertex_buffer->handle
@@ -111,6 +115,17 @@ void vkn::CommandBuffer::record(
 	0, 1,
 	vertex_buffers,
 	offsets);
+
+    vkCmdBindDescriptorSets(
+	this->handle,
+	VK_PIPELINE_BIND_POINT_GRAPHICS,
+	global.renderer->pipelines["main"]->layout,
+	0,
+	1,
+	&global.renderer->descriptor_sets
+	    [global.renderer->current_frame]->handle,
+	0,
+	nullptr);
 
     vkCmdDraw(this->handle, 3, 1, 0, 0);
 

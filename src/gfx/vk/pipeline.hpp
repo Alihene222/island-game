@@ -2,6 +2,7 @@
 
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
+#include "uniform_buffer.hpp"
 
 namespace vkn {
 
@@ -12,7 +13,11 @@ struct Pipeline {
 
     VkRenderPass render_pass;
 
-    Pipeline(std::string vs_path, std::string fs_path);
+    Pipeline() = default;
+    Pipeline(
+	std::string vs_path,
+	std::string fs_path,
+	VkDescriptorSetLayout *descriptor_set_layout);
 
     ~Pipeline();
 

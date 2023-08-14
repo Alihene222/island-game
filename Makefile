@@ -6,7 +6,7 @@ INCFLAGS += -Ilib/vulkan
 INCFLAGS += -Ilib/vk_video
 INCFLAGS += -Ilib/glm
 
-CCFLAGS = -std=c++20 -Wall -Wpedantic -Wextra -g -Wno-unused-command-line-argument
+CCFLAGS = -O3 -std=c++20 -Wall -Wpedantic -Wextra -Wno-unused-command-line-argument
 
 LDFLAGS  = lib/glfw/build/src/libglfw3.a
 LDFLAGS += -lvulkan

@@ -24,7 +24,10 @@ static std::vector<char> read_shader_file(
     return buffer;
 }
 
-vkn::Pipeline::Pipeline(std::string vs_path, std::string fs_path) {
+vkn::Pipeline::Pipeline(
+    std::string vs_path,
+    std::string fs_path,
+    VkDescriptorSetLayout *descriptor_set_layout) {
     VkAttachmentDescription color_attachment {};
     color_attachment.format =
 	global.vk_global->swapchain->surface_format.format;
@@ -111,7 +114,6 @@ vkn::Pipeline::Pipeline(std::string vs_path, std::string fs_path) {
     auto attribute_descriptions =
 	vkn::Vertex::get_attribute_descriptions();
 
-    // TODO: vertex buffers
     VkPipelineVertexInputStateCreateInfo vertex_input_info {};
     vertex_input_info.sType =
 	VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -187,12 +189,12 @@ vkn::Pipeline::Pipeline(std::string vs_path, std::string fs_path) {
     blend_info.pAttachments = &color_blend_attachment;
     blend_info.logicOpEnable = VK_FALSE;
 
-    // TODO: uniforms
     VkPipelineLayoutCreateInfo layout_create_info {};
     layout_create_info.sType =
 	VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    layout_create_info.setLayoutCount = 0;
-    layout_create_info.pSetLayouts = nullptr;
+    layout_create_info.setLayoutCount = 1;
+    layout_create_info.pSetLayouts =
+	descriptor_set_layout;
 
     if(vkCreatePipelineLayout(
 	global.vk_global->device->handle,

@@ -6,8 +6,15 @@
 #include "vk/command_buffer.hpp"
 #include "vk/sync.hpp"
 #include "vk/vertex_buffer.hpp"
+#include "vk/uniform_buffer.hpp"
 
 struct Renderer {
+    struct UniformBufferObject {
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::mat4 proj;
+    };
+
     static constexpr u32 layer_count = 1;
     static constexpr std::array<
 	const char*,
@@ -23,6 +30,9 @@ struct Renderer {
     };
 
     static constexpr u32 FRAMES_IN_FLIGHT = 3;
+
+    std::unique_ptr<vkn::DescriptorSetLayout>
+	descriptor_set_layout;
 
     std::unordered_map<
 	std::string,
@@ -47,6 +57,16 @@ struct Renderer {
     u32 current_frame = 0;
 
     std::unique_ptr<vkn::VertexBuffer> vertex_buffer;
+
+    std::array<
+	std::unique_ptr<vkn::UniformBuffer>,
+	FRAMES_IN_FLIGHT> uniform_buffers;
+
+    std::unique_ptr<vkn::DescriptorPool> descriptor_pool;
+
+    std::array<
+	std::unique_ptr<vkn::DescriptorSet>,
+	FRAMES_IN_FLIGHT> descriptor_sets;
 
     Renderer();
 

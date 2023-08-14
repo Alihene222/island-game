@@ -1,5 +1,7 @@
 #include "renderer.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "global.hpp"
 
 static const vkn::Vertex vertices[] = {
@@ -26,10 +28,15 @@ Renderer::Renderer() {
 	    vkn::Swapchain::SRGB,
 	    vkn::Swapchain::MAILBOX);
 
+    this->descriptor_set_layout =
+	std::make_unique<vkn::DescriptorSetLayout>(
+	    vkn::DescriptorSetLayout::STAGE_VERTEX);
+
     this->pipelines["main"] =
 	std::make_shared<vkn::Pipeline>(
 	    "res/shaders/basic.vert.spirv",
-	    "res/shaders/basic.frag.spirv");
+	    "res/shaders/basic.frag.spirv",
+	    &this->descriptor_set_layout->handle);
 
     global.vk_global->swapchain->create_framebuffers(
 	this->pipelines["main"]->render_pass);
@@ -53,6 +60,24 @@ Renderer::Renderer() {
 	std::make_unique<vkn::VertexBuffer>(
 	    (void*) vertices,
 	    sizeof(vertices));
+
+    for(usize i = 0; i < FRAMES_IN_FLIGHT; i++) {
+	this->uniform_buffers[i] =
+	    std::make_unique<vkn::UniformBuffer>(
+		sizeof(UniformBufferObject));
+    }
+
+    this->descriptor_pool =
+	std::make_unique<vkn::DescriptorPool>(FRAMES_IN_FLIGHT);
+
+    for(usize i = 0; i < FRAMES_IN_FLIGHT; i++) {
+	this->descriptor_sets[i] =
+	    std::make_unique<vkn::DescriptorSet>(
+		*this->uniform_buffers[i],
+		*this->descriptor_set_layout,
+		*this->descriptor_pool,
+		sizeof(UniformBufferObject));
+    }
 }
 
 Renderer::~Renderer() {
@@ -81,6 +106,29 @@ void Renderer::render() {
 	log("Failed to adapt swapchain", LOG_LEVEL_ERROR);
 	std::exit(-1);
     }
+
+    UniformBufferObject ubo;
+    ubo.model = glm::mat4(1.0f);
+    ubo.model = glm::rotate(
+	ubo.model,
+	(f32) glfwGetTime(),
+	glm::vec3(1.0f, 1.0f, 1.0f));
+
+    ubo.view = glm::translate(
+	glm::mat4(1.0f),
+	glm::vec3(0.0f, 0.0f, -2.0f));
+
+    ubo.proj = glm::perspective(
+	glm::radians(60.0f),
+	(f32) global.vk_global->swapchain->extent.width
+	    / (f32) global.vk_global->swapchain->extent.height,
+	0.1f,
+    100.0f);
+    
+    std::memcpy(
+	this->uniform_buffers[this->current_frame]->data,
+	&ubo,
+	sizeof(UniformBufferObject));
 
     this->in_flight_fences[this->current_frame]->reset();
 
