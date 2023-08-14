@@ -31,7 +31,7 @@ GLSLC = glslc
 all: dirs libs shaders build
 
 libs:
-	cd lib/glfw && cmake -S . -B build && make
+	cd lib/glfw && cmake -S . -B build && cd build && make
 
 dirs:
 	mkdir -p ./$(BIN)
