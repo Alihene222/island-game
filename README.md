@@ -1,3 +1,5 @@
 # Island game
 
-Simply `make run` to build and run if you want.
+Clone with `--recursive` to download submodules as well
+
+Simply run `make` to build
