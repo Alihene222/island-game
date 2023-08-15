@@ -2,9 +2,9 @@
 
 #include "global.hpp"
 
-vkn::CommandPool::CommandPool() {
-    vkn::QueueFamilyIndices indices =
-	vkn::find_queue_families(
+VKCommandPool::VKCommandPool() {
+    QueueFamilyIndices indices =
+	find_queue_families(
 	    global.vk_global->physical_device);
 
     VkCommandPoolCreateInfo create_info {};
@@ -23,13 +23,13 @@ vkn::CommandPool::CommandPool() {
     }
 }
 
-vkn::CommandPool::~CommandPool() {
+VKCommandPool::~VKCommandPool() {
     vkDestroyCommandPool(
 	global.vk_global->device->handle,
 	this->handle, nullptr);
 }
 
-vkn::CommandBuffer::CommandBuffer(const CommandPool &pool) {
+VKCommandBuffer::VKCommandBuffer(const VKCommandPool &pool) {
     VkCommandBufferAllocateInfo alloc_info {};
     alloc_info.sType =
 	VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -45,9 +45,9 @@ vkn::CommandBuffer::CommandBuffer(const CommandPool &pool) {
     }
 }
 
-void vkn::CommandBuffer::record(
-    u32 image_index,
-    std::shared_ptr<vkn::Pipeline> pipeline) {
+void VKCommandBuffer::begin(
+    const VKPipeline &pipeline,
+    VkFramebuffer framebuffer) {
     VkCommandBufferBeginInfo *begin_info =
 	global.frame_allocator.calloc<VkCommandBufferBeginInfo>();
     begin_info->sType =
@@ -66,9 +66,8 @@ void vkn::CommandBuffer::record(
 	global.frame_allocator.calloc<VkRenderPassBeginInfo>();
     render_pass_info->sType =
 	VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    render_pass_info->renderPass = pipeline->render_pass;
-    render_pass_info->framebuffer =
-	global.vk_global->swapchain->framebuffers[image_index];
+    render_pass_info->renderPass = pipeline.render_pass;
+    render_pass_info->framebuffer = framebuffer;
     render_pass_info->renderArea.offset = { 0, 0 };
     render_pass_info->renderArea.extent =
 	global.vk_global->swapchain->extent;
@@ -87,7 +86,7 @@ void vkn::CommandBuffer::record(
     vkCmdBindPipeline(
 	this->handle,
 	VK_PIPELINE_BIND_POINT_GRAPHICS,
-	pipeline->handle);
+	pipeline.handle);
 
     VkViewport *viewport = global.frame_allocator.calloc<VkViewport>();
     viewport->x = 0.0f;
@@ -104,31 +103,9 @@ void vkn::CommandBuffer::record(
     scissor->offset = { 0, 0 };
     scissor->extent = global.vk_global->swapchain->extent;
     vkCmdSetScissor(this->handle, 0, 1, scissor);
+}
 
-    VkBuffer vertex_buffers[] = {
-	global.renderer->vertex_buffer->handle
-    };
-    VkDeviceSize offsets[] = {0};
-
-    vkCmdBindVertexBuffers(
-	this->handle,
-	0, 1,
-	vertex_buffers,
-	offsets);
-
-    vkCmdBindDescriptorSets(
-	this->handle,
-	VK_PIPELINE_BIND_POINT_GRAPHICS,
-	global.renderer->pipelines["main"]->layout,
-	0,
-	1,
-	&global.renderer->descriptor_sets
-	    [global.renderer->current_frame]->handle,
-	0,
-	nullptr);
-
-    vkCmdDraw(this->handle, 6, 1, 0, 0);
-
+void VKCommandBuffer::end() {
     vkCmdEndRenderPass(this->handle);
     
     if(vkEndCommandBuffer(this->handle) != VK_SUCCESS) {
@@ -139,12 +116,12 @@ void vkn::CommandBuffer::record(
     }
 }
 
-void vkn::CommandBuffer::reset() {
+void VKCommandBuffer::reset() {
     vkResetCommandBuffer(this->handle, 0);
 }
 
-vkn::CommandBuffer vkn::cmd_begin_single() {
-    vkn::CommandBuffer command_buffer(
+VKCommandBuffer cmd_begin_single() {
+    VKCommandBuffer command_buffer(
 	*global.vk_global->command_pool);
 
     VkCommandBufferBeginInfo begin_info {};
@@ -165,7 +142,7 @@ vkn::CommandBuffer vkn::cmd_begin_single() {
     return command_buffer;
 }
 
-void vkn::cmd_end_single(vkn::CommandBuffer &command_buffer) {
+void cmd_end_single(VKCommandBuffer &command_buffer) {
     if(vkEndCommandBuffer(
 	command_buffer.handle) != VK_SUCCESS) {
 	log(

@@ -3,25 +3,23 @@
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
 
-namespace vkn {
-
-struct Device {
+struct VKDevice {
     VkDevice handle;
 
     VkQueue queue_graphics;
 
     VkQueue queue_present;
 
-    Device();
+    VKDevice();
     
-    ~Device();
+    ~VKDevice();
 
-    Device(const Device &other) = delete;
-    Device(Device &&other) {
+    VKDevice(const VKDevice &other) = delete;
+    VKDevice(VKDevice &&other) {
 	*this = std::move(other);
     }
-    Device &operator=(const Device &other) = delete;
-    Device &operator=(Device &&other) {
+    VKDevice &operator=(const VKDevice &other) = delete;
+    VKDevice &operator=(VKDevice &&other) {
 	this->handle = other.handle;
 	this->queue_graphics = other.queue_graphics;
 	this->queue_present = other.queue_present;
@@ -33,5 +31,3 @@ struct Device {
 
     void wait_idle();
 };
-
-}

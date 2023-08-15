@@ -4,9 +4,7 @@
 #include "util/std.hpp"
 #include "buffers.hpp"
 
-namespace vkn {
-
-struct FileTexture {
+struct VKFileTexture {
     VkBuffer buffer;
     VmaAllocation alloc;
 
@@ -17,14 +15,14 @@ struct FileTexture {
 
     VkSampler sampler;
 
-    FileTexture(std::string path);
+    VKFileTexture(std::string path);
 
-    ~FileTexture();
+    ~VKFileTexture();
 
-    FileTexture(const FileTexture &other) = delete;
-    FileTexture(FileTexture &&other) { *this = std::move(other); }
-    FileTexture &operator=(const FileTexture &other) = delete;
-    FileTexture &operator=(FileTexture &&other) {
+    VKFileTexture(const VKFileTexture &other) = delete;
+    VKFileTexture(VKFileTexture &&other) { *this = std::move(other); }
+    VKFileTexture &operator=(const VKFileTexture &other) = delete;
+    VKFileTexture &operator=(VKFileTexture &&other) {
 	this->buffer = other.buffer;
 	other.buffer = VK_NULL_HANDLE;
 	this->alloc = other.alloc;
@@ -38,5 +36,3 @@ struct FileTexture {
     
     VkDescriptorImageInfo descriptor_info();
 };
-
-}

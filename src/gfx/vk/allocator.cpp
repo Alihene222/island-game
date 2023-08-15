@@ -2,7 +2,7 @@
 
 #include "global.hpp"
 
-vkn::Allocator::Allocator() {
+VKAllocator::VKAllocator() {
     VmaAllocatorCreateInfo create_info {};
     create_info.physicalDevice =
 	global.vk_global->physical_device;
@@ -19,7 +19,7 @@ vkn::Allocator::Allocator() {
     }
 }
 
-vkn::Allocator::~Allocator() {
+VKAllocator::~VKAllocator() {
     for(const auto &entry : this->buffer_entries) {
 	vmaDestroyBuffer(
 	    this->handle,
@@ -35,14 +35,14 @@ vkn::Allocator::~Allocator() {
     vmaDestroyAllocator(this->handle);
 }
 
-void vkn::Allocator::add_entry(
+void VKAllocator::add_entry(
     VkBuffer buffer,
     VmaAllocation alloc) {
     BufferEntry entry { buffer, alloc };
     this->buffer_entries.push_back(entry);
 }
 
-void vkn::Allocator::add_entry(
+void VKAllocator::add_entry(
     VkImage image,
     VmaAllocation alloc) {
     ImageEntry entry { image, alloc };

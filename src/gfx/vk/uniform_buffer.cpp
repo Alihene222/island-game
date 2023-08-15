@@ -3,8 +3,8 @@
 #include "buffers.hpp"
 #include "global.hpp"
 
-vkn::UniformBuffer::UniformBuffer(usize size) : size(size) {
-    vkn::make_buffer(
+VKUniformBuffer::VKUniformBuffer(usize size) : size(size) {
+    make_buffer(
 	size,
 	VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 	VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,
@@ -20,13 +20,13 @@ vkn::UniformBuffer::UniformBuffer(usize size) : size(size) {
 	&this->data);
 }
 
-vkn::UniformBuffer::~UniformBuffer() {
+VKUniformBuffer::~VKUniformBuffer() {
     vmaUnmapMemory(
 	global.vk_global->allocator->handle,
 	this->alloc);	
 }
 
-VkDescriptorBufferInfo vkn::UniformBuffer::descriptor_info() {
+VkDescriptorBufferInfo VKUniformBuffer::descriptor_info() {
     VkDescriptorBufferInfo buffer_info {};
     buffer_info.buffer = this->handle;
     buffer_info.offset = 0;
@@ -34,7 +34,7 @@ VkDescriptorBufferInfo vkn::UniformBuffer::descriptor_info() {
     return buffer_info;
 }
 
-vkn::DescriptorSetLayout::DescriptorSetLayout(
+VKDescriptorSetLayout::VKDescriptorSetLayout(
     const std::vector<Binding> &bindings) {
     
     std::vector<VkDescriptorSetLayoutBinding> vk_bindings;
@@ -69,14 +69,14 @@ vkn::DescriptorSetLayout::DescriptorSetLayout(
     }
 }
 
-vkn::DescriptorSetLayout::~DescriptorSetLayout() {
+VKDescriptorSetLayout::~VKDescriptorSetLayout() {
     vkDestroyDescriptorSetLayout(
 	global.vk_global->device->handle,
 	this->handle,
 	nullptr);
 }
 
-vkn::DescriptorPool::DescriptorPool(u32 frames_in_flight) {
+VKDescriptorPool::VKDescriptorPool(u32 frames_in_flight) {
     std::array<VkDescriptorPoolSize, 2> pool_sizes {};
     pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pool_sizes[0].descriptorCount = frames_in_flight;
@@ -101,16 +101,16 @@ vkn::DescriptorPool::DescriptorPool(u32 frames_in_flight) {
     }
 }
 
-vkn::DescriptorPool::~DescriptorPool() {
+VKDescriptorPool::~VKDescriptorPool() {
     vkDestroyDescriptorPool(
 	global.vk_global->device->handle,
 	this->handle,
 	nullptr);
 }
 
-vkn::DescriptorSet::DescriptorSet(
-    const vkn::DescriptorSetLayout &layout,
-    const vkn::DescriptorPool &pool) {
+VKDescriptorSet::VKDescriptorSet(
+    const VKDescriptorSetLayout &layout,
+    const VKDescriptorPool &pool) {
     VkDescriptorSetAllocateInfo alloc_info {};
     alloc_info.sType =
 	VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -127,7 +127,7 @@ vkn::DescriptorSet::DescriptorSet(
     }
 }
 
-vkn::DescriptorSet &vkn::DescriptorSet::add_uniform(
+VKDescriptorSet &VKDescriptorSet::add_uniform(
     VkDescriptorBufferInfo *info) {
     VkWriteDescriptorSet descriptor_write {};
     descriptor_write.sType =
@@ -146,7 +146,7 @@ vkn::DescriptorSet &vkn::DescriptorSet::add_uniform(
     return *this;
 }
 
-vkn::DescriptorSet &vkn::DescriptorSet::add_sampler(
+VKDescriptorSet &VKDescriptorSet::add_sampler(
     VkDescriptorImageInfo *info) {
     VkWriteDescriptorSet descriptor_write {};
     descriptor_write.sType =
@@ -165,7 +165,7 @@ vkn::DescriptorSet &vkn::DescriptorSet::add_sampler(
     return *this;
 }
 
-void vkn::DescriptorSet::submit() {
+void VKDescriptorSet::submit() {
     vkUpdateDescriptorSets(
 	global.vk_global->device->handle,
 	this->info.descriptor_writes.size(),

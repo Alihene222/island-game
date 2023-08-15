@@ -34,45 +34,45 @@ struct Renderer {
 
     static constexpr u32 FRAMES_IN_FLIGHT = 3;
 
-    std::unique_ptr<vkn::DescriptorSetLayout>
+    std::unique_ptr<VKDescriptorSetLayout>
 	descriptor_set_layout;
 
     std::unordered_map<
 	std::string,
-	std::shared_ptr<vkn::Pipeline>> pipelines;
+	std::shared_ptr<VKPipeline>> pipelines;
 
     std::array<
-	std::unique_ptr<vkn::CommandBuffer>,
+	std::unique_ptr<VKCommandBuffer>,
 	FRAMES_IN_FLIGHT> command_buffers;
 
     std::array<
-	std::unique_ptr<vkn::Semaphore>,
+	std::unique_ptr<VKSemaphore>,
 	FRAMES_IN_FLIGHT> image_available_semaphores;
 
     std::array<
-	std::unique_ptr<vkn::Semaphore>,
+	std::unique_ptr<VKSemaphore>,
 	FRAMES_IN_FLIGHT> render_finished_semaphores;
 
     std::array<
-	std::unique_ptr<vkn::Fence>,
+	std::unique_ptr<VKFence>,
 	FRAMES_IN_FLIGHT> in_flight_fences;
 
     u32 current_frame = 0;
 
     std::unordered_map<
 	std::string,
-	std::unique_ptr<vkn::FileTexture>> textures;
+	std::unique_ptr<VKFileTexture>> textures;
 
-    std::unique_ptr<vkn::VertexBuffer> vertex_buffer;
+    std::unique_ptr<VKVertexBuffer> vertex_buffer;
 
     std::array<
-	std::unique_ptr<vkn::UniformBuffer>,
+	std::unique_ptr<VKUniformBuffer>,
 	FRAMES_IN_FLIGHT> uniform_buffers;
 
-    std::unique_ptr<vkn::DescriptorPool> descriptor_pool;
+    std::unique_ptr<VKDescriptorPool> descriptor_pool;
 
     std::array<
-	std::unique_ptr<vkn::DescriptorSet>,
+	std::unique_ptr<VKDescriptorSet>,
 	FRAMES_IN_FLIGHT> descriptor_sets;
 
     Renderer();

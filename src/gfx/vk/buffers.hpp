@@ -5,8 +5,6 @@
 #include "gfx/gfx.hpp"
 #include "util/util.hpp"
 
-namespace vkn {
-
 void make_buffer(
     VkDeviceSize size,
     VkBufferUsageFlags usage,
@@ -16,5 +14,3 @@ void make_buffer(
     f32 priority);
 
 void copy_buffer(VkBuffer src, VkBuffer dst, VkDeviceSize size);
-
-}

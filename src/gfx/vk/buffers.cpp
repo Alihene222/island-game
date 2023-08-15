@@ -3,7 +3,7 @@
 #include "global.hpp"
 #include "command_buffer.hpp"
 
-void vkn::make_buffer(
+void make_buffer(
     VkDeviceSize size,
     VkBufferUsageFlags usage,
     i32 flags,
@@ -32,12 +32,12 @@ void vkn::make_buffer(
 	&alloc_info);
 }
 
-void vkn::copy_buffer(
+void copy_buffer(
     VkBuffer src,
     VkBuffer dst,
     VkDeviceSize size) {
-    vkn::CommandBuffer command_buffer =
-	vkn::cmd_begin_single();
+    VKCommandBuffer command_buffer =
+	cmd_begin_single();
 
     VkBufferCopy copy_region {};
     copy_region.size = size;
@@ -46,5 +46,5 @@ void vkn::copy_buffer(
 	src, dst, 1,
 	&copy_region);
 
-    vkn::cmd_end_single(command_buffer);
+    cmd_end_single(command_buffer);
 }

@@ -15,7 +15,7 @@ struct Global {
 
     Platform *platform;
     Timer *timer;
-    VkGlobal *vk_global;
+    VKGlobal *vk_global;
     Renderer *renderer;
 
     // Current state

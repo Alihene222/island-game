@@ -5,39 +5,37 @@
 #include "util/util.hpp"
 #include "pipeline.hpp"
 
-namespace vkn {
-
-struct CommandPool {
+struct VKCommandPool {
     VkCommandPool handle;
 
-    CommandPool();
+    VKCommandPool();
 
-    ~CommandPool();
+    ~VKCommandPool();
 
-    CommandPool(const CommandPool &other) = delete;
-    CommandPool(CommandPool &&other) {
+    VKCommandPool(const VKCommandPool &other) = delete;
+    VKCommandPool(VKCommandPool &&other) {
 	*this = std::move(other);
     }
-    CommandPool &operator=(const CommandPool &other) = delete;
-    CommandPool &operator=(CommandPool &&other) {
+    VKCommandPool &operator=(const VKCommandPool &other) = delete;
+    VKCommandPool &operator=(VKCommandPool &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	return *this;
     }
 };
 
-struct CommandBuffer {
+struct VKCommandBuffer {
     VkCommandBuffer handle;
 
-    explicit CommandBuffer(const CommandPool &pool);
+    explicit VKCommandBuffer(const VKCommandPool &pool);
 
-    ~CommandBuffer() = default;
-    CommandBuffer(const CommandBuffer &other) = delete;
-    CommandBuffer(CommandBuffer &&other) {
+    ~VKCommandBuffer() = default;
+    VKCommandBuffer(const VKCommandBuffer &other) = delete;
+    VKCommandBuffer(VKCommandBuffer &&other) {
 	*this = std::move(other);
     }
-    CommandBuffer &operator=(const CommandBuffer &other) = delete;
-    CommandBuffer &operator=(CommandBuffer &&other) {
+    VKCommandBuffer &operator=(const VKCommandBuffer &other) = delete;
+    VKCommandBuffer &operator=(VKCommandBuffer &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	return *this;
@@ -45,13 +43,17 @@ struct CommandBuffer {
 
     void record(
 	u32 image_index,
-	std::shared_ptr<vkn::Pipeline> pipeline);
+	std::shared_ptr<VKPipeline> pipeline);
+
+    void begin(
+	const VKPipeline &pipeline,
+	VkFramebuffer framebuffer);
+
+    void end();
 
     void reset();
 };
 
-vkn::CommandBuffer cmd_begin_single();
+VKCommandBuffer cmd_begin_single();
 
-void cmd_end_single(vkn::CommandBuffer &command_buffer);
-
-}
+void cmd_end_single(VKCommandBuffer &command_buffer);

@@ -24,7 +24,7 @@ static std::vector<char> read_shader_file(
     return buffer;
 }
 
-vkn::Pipeline::Pipeline(
+VKPipeline::VKPipeline(
     std::string vs_path,
     std::string fs_path,
     VkDescriptorSetLayout *descriptor_set_layout) {
@@ -110,9 +110,9 @@ vkn::Pipeline::Pipeline(
     dynamic_state_info.pDynamicStates = &dynamic_states[0];
 
     auto binding_description =
-	vkn::Vertex::get_binding_description();
+	Vertex::get_binding_description();
     auto attribute_descriptions =
-	vkn::Vertex::get_attribute_descriptions();
+	Vertex::get_attribute_descriptions();
 
     VkPipelineVertexInputStateCreateInfo vertex_input_info {};
     vertex_input_info.sType =
@@ -236,7 +236,7 @@ vkn::Pipeline::Pipeline(
 	fs_module, nullptr);
 }
 
-vkn::Pipeline::~Pipeline() {
+VKPipeline::~VKPipeline() {
     vkDestroyPipeline(
 	global.vk_global->device->handle,
 	this->handle, nullptr);
@@ -248,7 +248,7 @@ vkn::Pipeline::~Pipeline() {
 	this->render_pass, nullptr);
 }
 
-VkShaderModule vkn::Pipeline::create_shader_module(
+VkShaderModule VKPipeline::create_shader_module(
     const std::vector<char> &code) {
     VkShaderModuleCreateInfo create_info {};
     create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

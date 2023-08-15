@@ -3,9 +3,9 @@
 #include "gfx/renderer.hpp"
 #include "global.hpp"
 
-vkn::QueueFamilyIndices vkn::find_queue_families(
+QueueFamilyIndices find_queue_families(
     VkPhysicalDevice device) {
-    vkn::QueueFamilyIndices indices;
+    QueueFamilyIndices indices;
 
     u32 queue_family_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(
@@ -46,7 +46,7 @@ vkn::QueueFamilyIndices vkn::find_queue_families(
     return indices;
 }
 
-bool vkn::check_extensions(VkPhysicalDevice device) {
+bool check_extensions(VkPhysicalDevice device) {
     u32 extension_count = 0;
     vkEnumerateDeviceExtensionProperties(
 	device, nullptr, &extension_count, nullptr);
@@ -70,9 +70,8 @@ bool vkn::check_extensions(VkPhysicalDevice device) {
     return needed_extensions.empty();
 }
 
-bool vkn::is_suitable(VkPhysicalDevice device) {
-    QueueFamilyIndices indices =
-	vkn::find_queue_families(device);
+bool is_suitable(VkPhysicalDevice device) {
+    QueueFamilyIndices indices = find_queue_families(device);
 
     bool extensions_supported = check_extensions(device);
 
@@ -85,7 +84,7 @@ bool vkn::is_suitable(VkPhysicalDevice device) {
 	&& supported_features.samplerAnisotropy;
 }
 
-VkPhysicalDevice vkn::pick_physical_device() {
+VkPhysicalDevice pick_physical_device() {
     u32 count = 0;
     vkEnumeratePhysicalDevices(
 	global.vk_global->instance->handle,
@@ -105,7 +104,7 @@ VkPhysicalDevice vkn::pick_physical_device() {
 	&count, &devices[0]);
     
     for(const auto &device : devices) {
-	if(vkn::is_suitable(device)) {
+	if(is_suitable(device)) {
 	    return device;
 	}
     }

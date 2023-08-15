@@ -8,32 +8,32 @@
 #include "command_buffer.hpp"
 #include "allocator.hpp"
 
-struct VkGlobal {
-    std::unique_ptr<vkn::Instance> instance;
+struct VKGlobal {
+    std::unique_ptr<VKInstance> instance;
     
     VkSurfaceKHR surface;
 
     VkPhysicalDevice physical_device;
 
-    std::unique_ptr<vkn::Device> device;
+    std::unique_ptr<VKDevice> device;
 
-    std::unique_ptr<vkn::Swapchain> swapchain;
+    std::unique_ptr<VKSwapchain> swapchain;
 
-    std::unique_ptr<vkn::CommandPool> command_pool;
+    std::unique_ptr<VKCommandPool> command_pool;
 
-    std::unique_ptr<vkn::Allocator> allocator;
+    std::unique_ptr<VKAllocator> allocator;
 
-    VkGlobal() = default;
+    VKGlobal() = default;
 
-    ~VkGlobal() {
+    ~VKGlobal() {
 	this->swapchain.reset();
 	vkDestroySurfaceKHR(
 	    this->instance->handle, this->surface, nullptr);
 	allocator.reset();
     };
 
-    VkGlobal(const VkGlobal &other) = delete;
-    VkGlobal(VkGlobal &&other) = default;
-    VkGlobal &operator=(const VkGlobal &other) = delete;
-    VkGlobal &operator=(VkGlobal &&other) = default;
+    VKGlobal(const VKGlobal &other) = delete;
+    VKGlobal(VKGlobal &&other) = default;
+    VKGlobal &operator=(const VKGlobal &other) = delete;
+    VKGlobal &operator=(VKGlobal &&other) = default;
 };

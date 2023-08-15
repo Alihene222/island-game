@@ -9,8 +9,8 @@ static void transition_layout(
     VkFormat format,
     VkImageLayout old_layout,
     VkImageLayout new_layout) {
-    vkn::CommandBuffer command_buffer =
-	vkn::cmd_begin_single();
+    VKCommandBuffer command_buffer =
+	cmd_begin_single();
 
     VkImageMemoryBarrier barrier {};
     barrier.sType =
@@ -62,7 +62,7 @@ static void transition_layout(
 	0, nullptr,
 	1, &barrier);
 
-    vkn::cmd_end_single(command_buffer);
+    cmd_end_single(command_buffer);
 }
 
 static void copy_buffer_to_image(
@@ -70,8 +70,8 @@ static void copy_buffer_to_image(
     VkImage image,
     u32 width,
     u32 height) {
-    vkn::CommandBuffer command_buffer =
-	vkn::cmd_begin_single();
+    VKCommandBuffer command_buffer =
+	cmd_begin_single();
 
     VkBufferImageCopy copy_region {};
     copy_region.bufferOffset = 0;
@@ -94,10 +94,10 @@ static void copy_buffer_to_image(
 	1,
 	&copy_region);
 
-    vkn::cmd_end_single(command_buffer);
+    cmd_end_single(command_buffer);
 }
 
-vkn::FileTexture::FileTexture(std::string path) {
+VKFileTexture::VKFileTexture(std::string path) {
     i32 tex_width, tex_height, tex_channels;
     stbi_uc *data = stbi_load(
 	path.c_str(),
@@ -117,7 +117,7 @@ vkn::FileTexture::FileTexture(std::string path) {
 
     VkBuffer staging_buffer;
     VmaAllocation staging_alloc;
-    vkn::make_buffer(
+    make_buffer(
 	size,
 	VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 	VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,
@@ -263,7 +263,7 @@ vkn::FileTexture::FileTexture(std::string path) {
     }
 }
 
-vkn::FileTexture::~FileTexture() {
+VKFileTexture::~VKFileTexture() {
     vkDestroySampler(
 	global.vk_global->device->handle,
 	this->sampler,
@@ -274,7 +274,7 @@ vkn::FileTexture::~FileTexture() {
 	nullptr);
 }
 
-VkDescriptorImageInfo vkn::FileTexture::descriptor_info() {
+VkDescriptorImageInfo VKFileTexture::descriptor_info() {
     VkDescriptorImageInfo image_info {};
     image_info.imageLayout =
 	VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

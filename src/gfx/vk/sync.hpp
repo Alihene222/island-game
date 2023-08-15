@@ -3,40 +3,38 @@
 #include "gfx/gfx.hpp"
 #include "util/util.hpp"
 
-namespace vkn {
-
-struct Semaphore {
+struct VKSemaphore {
     VkSemaphore handle;
 
-    Semaphore();
+    VKSemaphore();
 
-    ~Semaphore();
+    ~VKSemaphore();
 
-    Semaphore(const Semaphore &other) = delete;
-    Semaphore(Semaphore &&other) {
+    VKSemaphore(const VKSemaphore &other) = delete;
+    VKSemaphore(VKSemaphore &&other) {
 	*this = std::move(other);
     }
-    Semaphore &operator=(const Semaphore &other) = delete;
-    Semaphore &operator=(Semaphore &&other) {
+    VKSemaphore &operator=(const VKSemaphore &other) = delete;
+    VKSemaphore &operator=(VKSemaphore &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	return *this;
     }
 };
 
-struct Fence {
+struct VKFence {
     VkFence handle;
 
-    Fence();
+    VKFence();
 
-    ~Fence();
+    ~VKFence();
 
-    Fence(const Fence &other) = delete;
-    Fence(Fence &&other) {
+    VKFence(const VKFence &other) = delete;
+    VKFence(VKFence &&other) {
 	*this = std::move(other);
     }
-    Fence &operator=(const Fence &other) = delete;
-    Fence &operator=(Fence &&other) {
+    VKFence &operator=(const VKFence &other) = delete;
+    VKFence &operator=(VKFence &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	return *this;
@@ -46,5 +44,3 @@ struct Fence {
 
     void reset();
 };
-
-}

@@ -4,9 +4,9 @@
 #include "gfx/renderer.hpp"
 #include "global.hpp"
 
-vkn::Device::Device() {
-    vkn::QueueFamilyIndices indices =
-	vkn::find_queue_families(
+VKDevice::VKDevice() {
+    QueueFamilyIndices indices =
+	find_queue_families(
 	    global.vk_global->physical_device);
 
     std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
@@ -64,10 +64,10 @@ vkn::Device::Device() {
 	0, &this->queue_present);
 }
 
-vkn::Device::~Device() {
+VKDevice::~VKDevice() {
     vkDestroyDevice(this->handle, nullptr);
 }
 
-void vkn::Device::wait_idle() {
+void VKDevice::wait_idle() {
     vkDeviceWaitIdle(this->handle);
 }

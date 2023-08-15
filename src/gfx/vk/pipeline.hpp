@@ -4,29 +4,27 @@
 #include "util/std.hpp"
 #include "uniform_buffer.hpp"
 
-namespace vkn {
-
-struct Pipeline {
+struct VKPipeline {
     VkPipeline handle;
 
     VkPipelineLayout layout;
 
     VkRenderPass render_pass;
 
-    Pipeline() = default;
-    Pipeline(
+    VKPipeline() = default;
+    VKPipeline(
 	std::string vs_path,
 	std::string fs_path,
 	VkDescriptorSetLayout *descriptor_set_layout);
 
-    ~Pipeline();
+    ~VKPipeline();
 
-    Pipeline(const Pipeline &other) = delete;
-    Pipeline(Pipeline &&other) {
+    VKPipeline(const VKPipeline &other) = delete;
+    VKPipeline(VKPipeline &&other) {
 	*this = std::move(other);
     }
-    Pipeline &operator=(const Pipeline &other) = delete;
-    Pipeline &operator=(Pipeline &&other) {
+    VKPipeline &operator=(const VKPipeline &other) = delete;
+    VKPipeline &operator=(VKPipeline &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	this->layout = other.layout;
@@ -40,5 +38,3 @@ private:
     VkShaderModule create_shader_module(
 	const std::vector<char> &code);
 };
-
-}

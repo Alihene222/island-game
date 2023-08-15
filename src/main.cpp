@@ -16,7 +16,7 @@ int main(UNUSED int agc, UNUSED char **argv) {
     global.timer = &timer;
 
     // Global vulkan state. Initialized in Renderer
-    VkGlobal vk_global;
+    VKGlobal vk_global;
     global.vk_global = &vk_global;
 
     Renderer renderer;

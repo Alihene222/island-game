@@ -2,7 +2,7 @@
 
 #include "global.hpp"
 
-vkn::Semaphore::Semaphore() {
+VKSemaphore::VKSemaphore() {
     VkSemaphoreCreateInfo create_info {};
     create_info.sType =
 	VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -16,13 +16,13 @@ vkn::Semaphore::Semaphore() {
     }
 }
 
-vkn::Semaphore::~Semaphore() {
+VKSemaphore::~VKSemaphore() {
     vkDestroySemaphore(
 	global.vk_global->device->handle,
 	this->handle, nullptr);
 }
 
-vkn::Fence::Fence() {
+VKFence::VKFence() {
     VkFenceCreateInfo create_info {};
     create_info.sType =
 	VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -38,19 +38,19 @@ vkn::Fence::Fence() {
     }
 }
 
-vkn::Fence::~Fence() {
+VKFence::~VKFence() {
     vkDestroyFence(
 	global.vk_global->device->handle,
 	this->handle, nullptr);
 }
 
-void vkn::Fence::wait() {
+void VKFence::wait() {
     vkWaitForFences(
 	global.vk_global->device->handle,
 	1, &this->handle, VK_TRUE, UINT64_MAX);
 }
 
-void vkn::Fence::reset() {
+void VKFence::reset() {
     vkResetFences(
 	global.vk_global->device->handle,
 	1, &this->handle);

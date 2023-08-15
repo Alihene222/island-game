@@ -4,7 +4,7 @@
 
 #include "global.hpp"
 
-static const vkn::Vertex vertices[] = {
+static const Vertex vertices[] = {
     {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
     {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
     {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
@@ -15,37 +15,37 @@ static const vkn::Vertex vertices[] = {
 
 Renderer::Renderer() {
     global.vk_global->instance =
-	std::make_unique<vkn::Instance>();
+	std::make_unique<VKInstance>();
 
     global.vk_global->surface =
 	global.platform->window->create_surface();
 
     global.vk_global->physical_device =
-	vkn::pick_physical_device();
+	pick_physical_device();
 
     global.vk_global->device =
-	std::make_unique<vkn::Device>();
+	std::make_unique<VKDevice>();
 
     global.vk_global->allocator =
-	std::make_unique<vkn::Allocator>();
+	std::make_unique<VKAllocator>();
 
     global.vk_global->swapchain =
-	std::make_unique<vkn::Swapchain>(
-	    vkn::Swapchain::SRGB,
-	    vkn::Swapchain::FIFO);
+	std::make_unique<VKSwapchain>(
+	    VKSwapchain::SRGB,
+	    VKSwapchain::FIFO);
 
-    std::vector<vkn::DescriptorSetLayout::Binding> bindings;
-    vkn::DescriptorSetLayout::Binding layout_binding;
+    std::vector<VKDescriptorSetLayout::Binding> bindings;
+    VKDescriptorSetLayout::Binding layout_binding;
     layout_binding.location = 0;
     layout_binding.stage =
-	vkn::DescriptorSetLayout::STAGE_VERTEX;
+	VKDescriptorSetLayout::STAGE_VERTEX;
     layout_binding.type =
 	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
-    vkn::DescriptorSetLayout::Binding sampler_binding;
+    VKDescriptorSetLayout::Binding sampler_binding;
     sampler_binding.location = 1;
     sampler_binding.stage =
-	vkn::DescriptorSetLayout::STAGE_FRAGMENT;
+	VKDescriptorSetLayout::STAGE_FRAGMENT;
     sampler_binding.type =
 	VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 
@@ -53,11 +53,11 @@ Renderer::Renderer() {
     bindings.push_back(sampler_binding);
 
     this->descriptor_set_layout =
-	std::make_unique<vkn::DescriptorSetLayout>(
+	std::make_unique<VKDescriptorSetLayout>(
 	    bindings);
 
     this->pipelines["main"] =
-	std::make_shared<vkn::Pipeline>(
+	std::make_shared<VKPipeline>(
 	    "res/shaders/basic.vert.spirv",
 	    "res/shaders/basic.frag.spirv",
 	    &this->descriptor_set_layout->handle);
@@ -66,41 +66,41 @@ Renderer::Renderer() {
 	this->pipelines["main"]->render_pass);
 
     global.vk_global->command_pool =
-	std::make_unique<vkn::CommandPool>();
+	std::make_unique<VKCommandPool>();
 
     for(usize i = 0; i < FRAMES_IN_FLIGHT; i++) {
 	this->command_buffers[i] =
-	    std::make_unique<vkn::CommandBuffer>(
+	    std::make_unique<VKCommandBuffer>(
 		*global.vk_global->command_pool);
 	this->image_available_semaphores[i] =
-	    std::make_unique<vkn::Semaphore>();
+	    std::make_unique<VKSemaphore>();
 	this->render_finished_semaphores[i] =
-	    std::make_unique<vkn::Semaphore>();
+	    std::make_unique<VKSemaphore>();
 	this->in_flight_fences[i] =
-	    std::make_unique<vkn::Fence>();
+	    std::make_unique<VKFence>();
     }
 
-    this->textures["texture"] = std::make_unique<vkn::FileTexture>(
+    this->textures["texture"] = std::make_unique<VKFileTexture>(
 	"res/textures/texture.png");
 
     this->vertex_buffer =
-	std::make_unique<vkn::VertexBuffer>(
+	std::make_unique<VKVertexBuffer>(
 	    (void*) vertices,
 	    sizeof(vertices));
 
     for(usize i = 0; i < FRAMES_IN_FLIGHT; i++) {
 	this->uniform_buffers[i] =
-	    std::make_unique<vkn::UniformBuffer>(
+	    std::make_unique<VKUniformBuffer>(
 		sizeof(UniformBufferObject));
     }
 
     this->descriptor_pool =
-	std::make_unique<vkn::DescriptorPool>(FRAMES_IN_FLIGHT);
+	std::make_unique<VKDescriptorPool>(FRAMES_IN_FLIGHT);
 
 
     for(usize i = 0; i < FRAMES_IN_FLIGHT; i++) {
 	this->descriptor_sets[i] =
-	    std::make_unique<vkn::DescriptorSet>(
+	    std::make_unique<VKDescriptorSet>(
 		*this->descriptor_set_layout,
 		*this->descriptor_pool);
 
@@ -170,8 +170,38 @@ void Renderer::render() {
     this->in_flight_fences[this->current_frame]->reset();
 
     this->command_buffers[this->current_frame]->reset();
-    this->command_buffers[this->current_frame]->record(
-	image_index, this->pipelines["main"]);
+
+    this->command_buffers[this->current_frame]->begin(
+	*this->pipelines["main"],
+	global.vk_global->swapchain->framebuffers[image_index]);
+    
+    VkBuffer vertex_buffers[] = {
+	this->vertex_buffer->handle
+    };
+    VkDeviceSize offsets[] = {0};
+
+    vkCmdBindVertexBuffers(
+	this->command_buffers[current_frame]->handle,
+	0, 1,
+	vertex_buffers,
+	offsets);
+
+    vkCmdBindDescriptorSets(
+	this->command_buffers[current_frame]->handle,
+	VK_PIPELINE_BIND_POINT_GRAPHICS,
+	global.renderer->pipelines["main"]->layout,
+	0,
+	1,
+	&this->descriptor_sets
+	    [this->current_frame]->handle,
+	0,
+	nullptr);
+
+    vkCmdDraw(
+	this->command_buffers[this->current_frame]->handle,
+	6, 1, 0, 0);
+
+    this->command_buffers[this->current_frame]->end();
 
     VkSubmitInfo *submit_info =
 	global.frame_allocator.calloc<VkSubmitInfo>();

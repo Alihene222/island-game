@@ -66,7 +66,7 @@ static auto make_debug_messenger_create_info() {
     return create_info;
 }
 
-vkn::Instance::Instance() {
+VKInstance::VKInstance() {
     VkApplicationInfo app_info {};
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -127,7 +127,7 @@ vkn::Instance::Instance() {
     }
 }
 
-vkn::Instance::~Instance() {
+VKInstance::~VKInstance() {
     if(global.debug) {
 	vk_destroy_debug_utils_messenger_EXT(
 	    this->handle, this->debug_messenger, nullptr);

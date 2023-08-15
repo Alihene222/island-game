@@ -3,27 +3,23 @@
 #include "gfx//gfx.hpp"
 #include "util/std.hpp"
 
-namespace vkn {
-
-struct Instance {
+struct VKInstance {
     VkInstance handle;
 
     VkDebugUtilsMessengerEXT debug_messenger;
 
-    Instance();
+    VKInstance();
 
-    ~Instance();
+    ~VKInstance();
 
-    Instance(const Instance &other) = delete;
-    Instance(Instance &&other) {
+    VKInstance(const VKInstance &other) = delete;
+    VKInstance(VKInstance &&other) {
 	*this = std::move(other);
     }
-    Instance &operator=(const Instance &other) = delete;
-    Instance &operator=(Instance &&other) {
+    VKInstance &operator=(const VKInstance &other) = delete;
+    VKInstance &operator=(VKInstance &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	return *this;
     }
 };
-
-}

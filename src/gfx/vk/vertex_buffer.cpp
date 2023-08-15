@@ -4,7 +4,7 @@
 #include "global.hpp"
 
 VkVertexInputBindingDescription
-    vkn::Vertex::get_binding_description() {
+    Vertex::get_binding_description() {
     VkVertexInputBindingDescription binding_description;
     binding_description.binding = 0;
     binding_description.stride = sizeof(Vertex);
@@ -14,7 +14,7 @@ VkVertexInputBindingDescription
 }
 
 std::array<VkVertexInputAttributeDescription, 3>
-    vkn::Vertex::get_attribute_descriptions() {
+    Vertex::get_attribute_descriptions() {
     std::array<VkVertexInputAttributeDescription, 3>
 	attribute_descriptions {};
 
@@ -42,11 +42,11 @@ std::array<VkVertexInputAttributeDescription, 3>
     return attribute_descriptions;
 }
 
-vkn::VertexBuffer::VertexBuffer(void *data, usize size) {
+VKVertexBuffer::VKVertexBuffer(void *data, usize size) {
     VkBuffer staging_buffer;
     VmaAllocation staging_alloc;
 
-    vkn::make_buffer(
+    make_buffer(
 	size,
 	VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 	VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,
@@ -64,7 +64,7 @@ vkn::VertexBuffer::VertexBuffer(void *data, usize size) {
 	global.vk_global->allocator->handle,
 	staging_alloc);
 
-    vkn::make_buffer(
+    make_buffer(
 	size,
 	VK_BUFFER_USAGE_TRANSFER_DST_BIT
 	| VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
@@ -74,7 +74,7 @@ vkn::VertexBuffer::VertexBuffer(void *data, usize size) {
 	1.0f);
     global.vk_global->allocator->add_entry(
 	this->handle, this->alloc);
-    vkn::copy_buffer(staging_buffer, this->handle, size);
+    copy_buffer(staging_buffer, this->handle, size);
 
     vmaDestroyBuffer(
 	global.vk_global->allocator->handle,

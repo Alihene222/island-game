@@ -2,7 +2,7 @@
 
 #include "global.hpp"
 
-vkn::Swapchain::Swapchain(
+VKSwapchain::VKSwapchain(
     ColorSpace preferred_color_space,
     PresentMode preferred_present_mode)
     : preferred_color_space(preferred_color_space),
@@ -10,11 +10,11 @@ vkn::Swapchain::Swapchain(
     this->create();
 }
 
-vkn::Swapchain::~Swapchain() {
+VKSwapchain::~VKSwapchain() {
     this->destroy();
 }
 
-void vkn::Swapchain::create() {
+void VKSwapchain::create() {
     SwapchainSupportDetails support_details =
 	this->query_support(global.vk_global->physical_device);
     this->choose_surface_format(support_details.formats);
@@ -40,7 +40,7 @@ void vkn::Swapchain::create() {
     create_info.imageArrayLayers = 1;
     create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    vkn::QueueFamilyIndices indices = vkn::find_queue_families(
+    QueueFamilyIndices indices = find_queue_families(
 	global.vk_global->physical_device);
     u32 queue_family_indices[] = {
 	indices.graphics.value(),
@@ -112,7 +112,7 @@ void vkn::Swapchain::create() {
     }
 }
 
-void vkn::Swapchain::destroy() {
+void VKSwapchain::destroy() {
     for(const auto &framebuffer : this->framebuffers) {
 	vkDestroyFramebuffer(
 	    global.vk_global->device->handle,
@@ -130,7 +130,7 @@ void vkn::Swapchain::destroy() {
 	this->handle, nullptr);
 }
 
-void vkn::Swapchain::create_framebuffers(
+void VKSwapchain::create_framebuffers(
     VkRenderPass render_pass) {
     this->framebuffers.resize(this->image_views.size());
     for(u64 i = 0; i < this->image_views.size(); i++) {
@@ -158,7 +158,7 @@ void vkn::Swapchain::create_framebuffers(
     }
 }
 
-void vkn::Swapchain::adapt(VkRenderPass render_pass) {
+void VKSwapchain::adapt(VkRenderPass render_pass) {
     std::tuple<i32, i32> tuple =
 	global.platform->window->get_size();
     i32 width = std::get<0>(tuple);
@@ -178,9 +178,9 @@ void vkn::Swapchain::adapt(VkRenderPass render_pass) {
     this->create_framebuffers(render_pass);
 }
 
-vkn::SwapchainSupportDetails vkn::Swapchain::query_support(
+SwapchainSupportDetails VKSwapchain::query_support(
     VkPhysicalDevice device) const {
-    vkn::SwapchainSupportDetails details;
+    SwapchainSupportDetails details;
 
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
 	device, global.vk_global->surface,
@@ -214,7 +214,7 @@ vkn::SwapchainSupportDetails vkn::Swapchain::query_support(
     return details;
 }
 
-void vkn::Swapchain::choose_surface_format(
+void VKSwapchain::choose_surface_format(
     const std::vector<VkSurfaceFormatKHR> &available_formats) {
     bool selected = false;
 
@@ -241,7 +241,7 @@ void vkn::Swapchain::choose_surface_format(
     }
 }
 
-void vkn::Swapchain::choose_present_mode(
+void VKSwapchain::choose_present_mode(
     const std::vector<VkPresentModeKHR> &available_modes) {
     bool selected = false;
 
@@ -273,7 +273,7 @@ void vkn::Swapchain::choose_present_mode(
     }
 }
 
-void vkn::Swapchain::choose_extent(
+void VKSwapchain::choose_extent(
     const VkSurfaceCapabilitiesKHR &capabilities) {
     if(capabilities.currentExtent.width
 	!= std::numeric_limits<u32>::max()) {

@@ -4,15 +4,13 @@
 #include "util/std.hpp"
 #include "pipeline.hpp"
 
-namespace vkn {
-
 struct SwapchainSupportDetails {
     VkSurfaceCapabilitiesKHR capabilities;
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> present_modes;
 };
 
-struct Swapchain {
+struct VKSwapchain {
     VkSwapchainKHR handle;
 
     VkSurfaceFormatKHR surface_format;
@@ -37,18 +35,18 @@ struct Swapchain {
 	MAILBOX
     } preferred_present_mode;
 
-    Swapchain(
+    VKSwapchain(
 	ColorSpace preferred_color_space = SRGB,
 	PresentMode preferred_present_mode = MAILBOX);
 
-    ~Swapchain();
+    ~VKSwapchain();
 
-    Swapchain(const Swapchain &other) = delete;
-    Swapchain(Swapchain &&other) {
+    VKSwapchain(const VKSwapchain &other) = delete;
+    VKSwapchain(VKSwapchain &&other) {
 	*this = std::move(other);
     }
-    Swapchain &operator=(const Swapchain &other) = delete;
-    Swapchain &operator=(Swapchain &&other) {
+    VKSwapchain &operator=(const VKSwapchain &other) = delete;
+    VKSwapchain &operator=(VKSwapchain &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	this->surface_format = other.surface_format;
@@ -80,5 +78,3 @@ private:
 
     void choose_extent(const VkSurfaceCapabilitiesKHR &capabilities);
 };
-
-}

@@ -7,9 +7,7 @@
 #include "util/util.hpp"
 #include "file_texture.hpp"
 
-namespace vkn {
-
-struct UniformBuffer {
+struct VKUniformBuffer {
     VkBuffer handle;
 
     VmaAllocation alloc;
@@ -18,17 +16,17 @@ struct UniformBuffer {
 
     usize size;
 
-    UniformBuffer() = default;
-    explicit UniformBuffer(usize size);
+    VKUniformBuffer() = default;
+    explicit VKUniformBuffer(usize size);
 
-    ~UniformBuffer();
+    ~VKUniformBuffer();
 
-    UniformBuffer(const UniformBuffer &other) = delete;
-    UniformBuffer(UniformBuffer &&other) {
+    VKUniformBuffer(const VKUniformBuffer &other) = delete;
+    VKUniformBuffer(VKUniformBuffer &&other) {
 	*this = std::move(other);
     }
-    UniformBuffer &operator=(const UniformBuffer &other) = delete;
-    UniformBuffer &operator=(UniformBuffer &&other) {
+    VKUniformBuffer &operator=(const VKUniformBuffer &other) = delete;
+    VKUniformBuffer &operator=(VKUniformBuffer &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	this->alloc = other.alloc;
@@ -41,7 +39,7 @@ struct UniformBuffer {
     VkDescriptorBufferInfo descriptor_info();
 };
 
-struct DescriptorSetLayout {
+struct VKDescriptorSetLayout {
     enum Stage {
 	STAGE_VERTEX,
 	STAGE_FRAGMENT
@@ -55,45 +53,45 @@ struct DescriptorSetLayout {
 
     VkDescriptorSetLayout handle;
 
-    DescriptorSetLayout() = default;
-    explicit DescriptorSetLayout(
+    VKDescriptorSetLayout() = default;
+    explicit VKDescriptorSetLayout(
 	const std::vector<Binding> &bindings);
 
-    ~DescriptorSetLayout();
+    ~VKDescriptorSetLayout();
 
-    DescriptorSetLayout(const DescriptorSetLayout &other) = delete;
-    DescriptorSetLayout(DescriptorSetLayout &&other) {
+    VKDescriptorSetLayout(const VKDescriptorSetLayout &other) = delete;
+    VKDescriptorSetLayout(VKDescriptorSetLayout &&other) {
 	*this = std::move(other);
     }
-    DescriptorSetLayout &operator=(const DescriptorSetLayout &other) = delete;
-    DescriptorSetLayout &operator=(DescriptorSetLayout &&other) {
+    VKDescriptorSetLayout &operator=(const VKDescriptorSetLayout &other) = delete;
+    VKDescriptorSetLayout &operator=(VKDescriptorSetLayout &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	return *this;
     }
 };
 
-struct DescriptorPool {
+struct VKDescriptorPool {
     VkDescriptorPool handle;
 
-    DescriptorPool() = default;
-    DescriptorPool(u32 frames_in_flight);
+    VKDescriptorPool() = default;
+    VKDescriptorPool(u32 frames_in_flight);
 
-    ~DescriptorPool();
+    ~VKDescriptorPool();
 
-    DescriptorPool(const DescriptorPool &other) = delete;
-    DescriptorPool(DescriptorPool &&other) {
+    VKDescriptorPool(const VKDescriptorPool &other) = delete;
+    VKDescriptorPool(VKDescriptorPool &&other) {
 	*this = std::move(other);
     }
-    DescriptorPool &operator=(const DescriptorPool &other) = delete;
-    DescriptorPool &operator=(DescriptorPool &&other) {
+    VKDescriptorPool &operator=(const VKDescriptorPool &other) = delete;
+    VKDescriptorPool &operator=(VKDescriptorPool &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	return *this;
     }
 };
 
-struct DescriptorSet {
+struct VKDescriptorSet {
     struct Info {
 	usize size = 0;
 	std::vector<VkWriteDescriptorSet> descriptor_writes;
@@ -105,26 +103,24 @@ struct DescriptorSet {
 
     VkDescriptorSet handle;
 
-    DescriptorSet() = default;
-    DescriptorSet(
-	const vkn::DescriptorSetLayout &layout,
-	const vkn::DescriptorPool &pool);
+    VKDescriptorSet() = default;
+    VKDescriptorSet(
+	const VKDescriptorSetLayout &layout,
+	const VKDescriptorPool &pool);
 
-    ~DescriptorSet() = default;
-    DescriptorSet(const DescriptorSet &other) = delete;
-    DescriptorSet(DescriptorSet &&other) {
+    ~VKDescriptorSet() = default;
+    VKDescriptorSet(const VKDescriptorSet &other) = delete;
+    VKDescriptorSet(VKDescriptorSet &&other) {
 	*this = std::move(other);
     }
-    DescriptorSet &operator=(const DescriptorSet &other) = delete;
-    DescriptorSet &operator=(DescriptorSet &&other) {
+    VKDescriptorSet &operator=(const VKDescriptorSet &other) = delete;
+    VKDescriptorSet &operator=(VKDescriptorSet &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	return *this;
     }
 
-    DescriptorSet &add_uniform(VkDescriptorBufferInfo *info);
-    DescriptorSet &add_sampler(VkDescriptorImageInfo *info);
+    VKDescriptorSet &add_uniform(VkDescriptorBufferInfo *info);
+    VKDescriptorSet &add_sampler(VkDescriptorImageInfo *info);
     void submit();
 };
-
-}

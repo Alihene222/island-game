@@ -5,8 +5,6 @@
 #include "util/util.hpp"
 #include "instance.hpp"
 
-namespace vkn {
-
 struct QueueFamilyIndices {
     std::optional<u32> graphics;
     std::optional<u32> present;
@@ -24,5 +22,3 @@ bool check_extensions(VkPhysicalDevice device);
 bool is_suitable(VkPhysicalDevice device);
 
 VkPhysicalDevice pick_physical_device();
-
-}

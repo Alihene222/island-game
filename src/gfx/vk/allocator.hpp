@@ -5,9 +5,7 @@
 #include "util/std.hpp"
 #include "gfx/gfx.hpp"
 
-namespace vkn {
-
-struct Allocator {
+struct VKAllocator {
     struct BufferEntry {
 	VkBuffer buffer;
 	VmaAllocation allocation;
@@ -24,16 +22,16 @@ struct Allocator {
 
     VmaAllocator handle;
 
-    Allocator();
+    VKAllocator();
 
-    ~Allocator();
+    ~VKAllocator();
 
-    Allocator(const Allocator &other) = delete;
-    Allocator(Allocator &&other) {
+    VKAllocator(const VKAllocator &other) = delete;
+    VKAllocator(VKAllocator &&other) {
 	*this = std::move(other);
     }
-    Allocator &operator=(const Allocator &other) = delete;
-    Allocator &operator=(Allocator &&other) {
+    VKAllocator &operator=(const VKAllocator &other) = delete;
+    VKAllocator &operator=(VKAllocator &&other) {
 	this->handle = other.handle;
 	other.handle = VK_NULL_HANDLE;
 	return *this;
@@ -41,6 +39,4 @@ struct Allocator {
 
     void add_entry(VkBuffer buffer, VmaAllocation alloc);
     void add_entry(VkImage image, VmaAllocation alloc);
-};
-
 };
