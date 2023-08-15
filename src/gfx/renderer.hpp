@@ -9,6 +9,7 @@
 #include "vk/sync.hpp"
 #include "vk/vertex_buffer.hpp"
 #include "vk/uniform_buffer.hpp"
+#include "vk/file_texture.hpp"
 
 struct Renderer {
     struct UniformBufferObject {
@@ -57,6 +58,10 @@ struct Renderer {
 	FRAMES_IN_FLIGHT> in_flight_fences;
 
     u32 current_frame = 0;
+
+    std::unordered_map<
+	std::string,
+	std::unique_ptr<vkn::FileTexture>> textures;
 
     std::unique_ptr<vkn::VertexBuffer> vertex_buffer;
 

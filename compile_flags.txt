@@ -10,4 +10,6 @@ lib/glfw/include
 lib/glm
 -I
 lib/vma
+-I
+lib/stb
 -std=c++20

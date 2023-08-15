@@ -50,4 +50,8 @@ struct CommandBuffer {
     void reset();
 };
 
+vkn::CommandBuffer cmd_begin_single();
+
+void cmd_end_single(vkn::CommandBuffer &command_buffer);
+
 }

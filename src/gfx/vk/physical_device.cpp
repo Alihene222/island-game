@@ -76,7 +76,13 @@ bool vkn::is_suitable(VkPhysicalDevice device) {
 
     bool extensions_supported = check_extensions(device);
 
-    return indices.is_complete() && extensions_supported;
+    VkPhysicalDeviceFeatures supported_features;
+    vkGetPhysicalDeviceFeatures(
+	device, &supported_features);
+
+    return indices.is_complete() 
+	&& extensions_supported
+	&& supported_features.samplerAnisotropy;
 }
 
 VkPhysicalDevice vkn::pick_physical_device() {

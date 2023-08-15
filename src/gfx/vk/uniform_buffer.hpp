@@ -5,6 +5,7 @@
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
 #include "util/util.hpp"
+#include "file_texture.hpp"
 
 namespace vkn {
 
@@ -89,7 +90,8 @@ struct DescriptorSet {
 	const vkn::UniformBuffer &uniform_buffer,
 	const vkn::DescriptorSetLayout &layout,
 	const vkn::DescriptorPool &pool,
-	usize ubo_size);
+	usize ubo_size,
+	const FileTexture &texture);
 
     ~DescriptorSet() = default;
     DescriptorSet(const DescriptorSet &other) = delete;

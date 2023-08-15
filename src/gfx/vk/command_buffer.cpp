@@ -127,7 +127,7 @@ void vkn::CommandBuffer::record(
 	0,
 	nullptr);
 
-    vkCmdDraw(this->handle, 3, 1, 0, 0);
+    vkCmdDraw(this->handle, 6, 1, 0, 0);
 
     vkCmdEndRenderPass(this->handle);
     
@@ -141,4 +141,54 @@ void vkn::CommandBuffer::record(
 
 void vkn::CommandBuffer::reset() {
     vkResetCommandBuffer(this->handle, 0);
+}
+
+vkn::CommandBuffer vkn::cmd_begin_single() {
+    vkn::CommandBuffer command_buffer(
+	*global.vk_global->command_pool);
+
+    VkCommandBufferBeginInfo begin_info {};
+    begin_info.sType =
+	VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags =
+	VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    if(vkBeginCommandBuffer(
+	command_buffer.handle,
+	&begin_info) != VK_SUCCESS) {
+	log(
+	    "Failed to begin single time command buffer",
+	    LOG_LEVEL_FATAL);
+	std::exit(-1);
+    }
+
+    return command_buffer;
+}
+
+void vkn::cmd_end_single(vkn::CommandBuffer &command_buffer) {
+    if(vkEndCommandBuffer(
+	command_buffer.handle) != VK_SUCCESS) {
+	log(
+	    "Failed to end copying buffer",
+	    LOG_LEVEL_ERROR);
+	std::exit(-1);
+    }
+    
+    VkSubmitInfo submit_info {};
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers =
+	&command_buffer.handle;
+
+    vkQueueSubmit(
+	global.vk_global->device->queue_graphics,
+	1, &submit_info,
+	VK_NULL_HANDLE);
+    vkQueueWaitIdle(
+	global.vk_global->device->queue_graphics);
+
+    vkFreeCommandBuffers(
+	global.vk_global->device->handle,
+	global.vk_global->command_pool->handle,
+	1, &command_buffer.handle);
 }

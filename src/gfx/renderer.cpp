@@ -4,13 +4,13 @@
 
 #include "global.hpp"
 
-#define VMA_IMPLEMENTATION
-#include "vk_mem_alloc.h"
-
 static const vkn::Vertex vertices[] = {
-    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-    {{0.0f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}
+    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+    {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    {{-0.5f, 0.5f, 0.0f}, {1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 };
 
 Renderer::Renderer() {
@@ -62,6 +62,9 @@ Renderer::Renderer() {
 	    std::make_unique<vkn::Fence>();
     }
 
+    this->textures["texture"] = std::make_unique<vkn::FileTexture>(
+	"res/textures/texture.png");
+
     this->vertex_buffer =
 	std::make_unique<vkn::VertexBuffer>(
 	    (void*) vertices,
@@ -82,7 +85,8 @@ Renderer::Renderer() {
 		*this->uniform_buffers[i],
 		*this->descriptor_set_layout,
 		*this->descriptor_pool,
-		sizeof(UniformBufferObject));
+		sizeof(UniformBufferObject),
+		*this->textures["texture"]);
     }
 }
 

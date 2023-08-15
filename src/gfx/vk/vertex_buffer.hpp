@@ -12,12 +12,13 @@ namespace vkn {
 struct Vertex {
     glm::vec3 pos;
     glm::vec3 color;
+    glm::vec2 tex_coords;
 
     static VkVertexInputBindingDescription
 	get_binding_description(); 
 
     static std::array<
-	VkVertexInputAttributeDescription, 2>
+	VkVertexInputAttributeDescription, 3>
 	    get_attribute_descriptions();
 };
 

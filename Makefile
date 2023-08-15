@@ -6,6 +6,7 @@ INCFLAGS += -Ilib/vulkan
 INCFLAGS += -Ilib/vk_video
 INCFLAGS += -Ilib/glm
 INCFLAGS += -Ilib/vma
+INCFLAGS += -Ilib/stb
 
 CCFLAGS  = -O2 -g -std=c++20 -Wall -Wpedantic -Wextra
 CCFLAGS += -Wno-unused-command-line-argument

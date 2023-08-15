@@ -8,12 +8,19 @@
 namespace vkn {
 
 struct Allocator {
-    struct Entry {
+    struct BufferEntry {
 	VkBuffer buffer;
 	VmaAllocation allocation;
     };
 
-    std::vector<Entry> entries;
+    struct ImageEntry {
+	VkImage image;
+	VmaAllocation allocation;
+    };
+
+    std::vector<BufferEntry> buffer_entries;
+
+    std::vector<ImageEntry> image_entries;
 
     VmaAllocator handle;
 
@@ -33,6 +40,7 @@ struct Allocator {
     }
 
     void add_entry(VkBuffer buffer, VmaAllocation alloc);
+    void add_entry(VkImage image, VmaAllocation alloc);
 };
 
 };

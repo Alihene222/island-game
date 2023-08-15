@@ -20,10 +20,16 @@ vkn::Allocator::Allocator() {
 }
 
 vkn::Allocator::~Allocator() {
-    for(const auto &entry : this->entries) {
+    for(const auto &entry : this->buffer_entries) {
 	vmaDestroyBuffer(
 	    this->handle,
 	    entry.buffer,
+	    entry.allocation);
+    }
+    for(const auto &entry : this->image_entries) {
+	vmaDestroyImage(
+	    this->handle,
+	    entry.image,
 	    entry.allocation);
     }
     vmaDestroyAllocator(this->handle);
@@ -32,6 +38,13 @@ vkn::Allocator::~Allocator() {
 void vkn::Allocator::add_entry(
     VkBuffer buffer,
     VmaAllocation alloc) {
-    Entry entry { buffer, alloc };
-    this->entries.push_back(entry);
+    BufferEntry entry { buffer, alloc };
+    this->buffer_entries.push_back(entry);
+}
+
+void vkn::Allocator::add_entry(
+    VkImage image,
+    VmaAllocation alloc) {
+    ImageEntry entry { image, alloc };
+    this->image_entries.push_back(entry);
 }

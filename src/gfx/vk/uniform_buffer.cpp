@@ -38,11 +38,24 @@ vkn::DescriptorSetLayout::DescriptorSetLayout(
 	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     layout_binding.descriptorCount = 1;
 
+    VkDescriptorSetLayoutBinding sampler_binding {};
+    sampler_binding.binding = 1;
+    sampler_binding.stageFlags =
+	VK_SHADER_STAGE_FRAGMENT_BIT;
+    sampler_binding.descriptorType =
+	VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    sampler_binding.descriptorCount = 1;
+
+    VkDescriptorSetLayoutBinding bindings[] = {
+	layout_binding,
+	sampler_binding
+    };
+
     VkDescriptorSetLayoutCreateInfo create_info {};
     create_info.sType =
 	VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    create_info.bindingCount = 1;
-    create_info.pBindings = &layout_binding;
+    create_info.bindingCount = 2;
+    create_info.pBindings = bindings;
 
     if(vkCreateDescriptorSetLayout(
 	global.vk_global->device->handle,
@@ -64,15 +77,18 @@ vkn::DescriptorSetLayout::~DescriptorSetLayout() {
 }
 
 vkn::DescriptorPool::DescriptorPool(u32 frames_in_flight) {
-    VkDescriptorPoolSize pool_size {};
-    pool_size.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    pool_size.descriptorCount = frames_in_flight;
+    std::array<VkDescriptorPoolSize, 2> pool_sizes {};
+    pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    pool_sizes[0].descriptorCount = frames_in_flight;
+    pool_sizes[1].type =
+	VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    pool_sizes[1].descriptorCount = frames_in_flight;
 
     VkDescriptorPoolCreateInfo create_info {};
     create_info.sType =
 	VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    create_info.poolSizeCount = 1;
-    create_info.pPoolSizes = &pool_size;
+    create_info.poolSizeCount = pool_sizes.size();
+    create_info.pPoolSizes = &pool_sizes[0];
     create_info.maxSets = frames_in_flight;
 
     if(vkCreateDescriptorPool(
@@ -96,7 +112,8 @@ vkn::DescriptorSet::DescriptorSet(
     const vkn::UniformBuffer &uniform_buffer,
     const vkn::DescriptorSetLayout &layout,
     const vkn::DescriptorPool &pool,
-    usize ubo_size) {
+    usize ubo_size,
+    const FileTexture &texture) {
     VkDescriptorSetAllocateInfo alloc_info {};
     alloc_info.sType =
 	VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -117,21 +134,38 @@ vkn::DescriptorSet::DescriptorSet(
     buffer_info.offset = 0;
     buffer_info.range = ubo_size;
 
-    VkWriteDescriptorSet descriptor_write {};
-    descriptor_write.sType =
+    VkDescriptorImageInfo image_info {};
+    image_info.imageLayout =
+	VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    image_info.imageView = texture.image_view;
+    image_info.sampler = texture.sampler;
+
+    std::array<VkWriteDescriptorSet, 2> descriptor_writes {};
+
+    descriptor_writes[0].sType =
 	VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptor_write.dstSet = this->handle;
-    descriptor_write.dstBinding = 0;
-    descriptor_write.dstArrayElement = 0;
-    descriptor_write.descriptorType =
+    descriptor_writes[0].dstSet = this->handle;
+    descriptor_writes[0].dstBinding = 0;
+    descriptor_writes[0].dstArrayElement = 0;
+    descriptor_writes[0].descriptorType =
 	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptor_write.descriptorCount = 1;
-    descriptor_write.pBufferInfo = &buffer_info;
+    descriptor_writes[0].descriptorCount = 1;
+    descriptor_writes[0].pBufferInfo = &buffer_info;
+
+    descriptor_writes[1].sType =
+	VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptor_writes[1].dstSet = this->handle;
+    descriptor_writes[1].dstBinding = 1;
+    descriptor_writes[1].dstArrayElement = 0;
+    descriptor_writes[1].descriptorType =
+	VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptor_writes[1].descriptorCount = 1;
+    descriptor_writes[1].pImageInfo = &image_info;
 
     vkUpdateDescriptorSets(
 	global.vk_global->device->handle,
-	1,
-	&descriptor_write,
+	descriptor_writes.size(),
+	&descriptor_writes[0],
 	0,
 	nullptr);
 }
