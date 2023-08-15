@@ -35,6 +35,8 @@ struct FileTexture {
 	other.image_alloc = VK_NULL_HANDLE;
 	return *this;
     }
+    
+    VkDescriptorImageInfo descriptor_info();
 };
 
 }

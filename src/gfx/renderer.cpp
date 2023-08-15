@@ -34,9 +34,27 @@ Renderer::Renderer() {
 	    vkn::Swapchain::SRGB,
 	    vkn::Swapchain::FIFO);
 
+    std::vector<vkn::DescriptorSetLayout::Binding> bindings;
+    vkn::DescriptorSetLayout::Binding layout_binding;
+    layout_binding.location = 0;
+    layout_binding.stage =
+	vkn::DescriptorSetLayout::STAGE_VERTEX;
+    layout_binding.type =
+	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+    vkn::DescriptorSetLayout::Binding sampler_binding;
+    sampler_binding.location = 1;
+    sampler_binding.stage =
+	vkn::DescriptorSetLayout::STAGE_FRAGMENT;
+    sampler_binding.type =
+	VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
+    bindings.push_back(layout_binding);
+    bindings.push_back(sampler_binding);
+
     this->descriptor_set_layout =
 	std::make_unique<vkn::DescriptorSetLayout>(
-	    vkn::DescriptorSetLayout::STAGE_VERTEX);
+	    bindings);
 
     this->pipelines["main"] =
 	std::make_shared<vkn::Pipeline>(
@@ -79,14 +97,21 @@ Renderer::Renderer() {
     this->descriptor_pool =
 	std::make_unique<vkn::DescriptorPool>(FRAMES_IN_FLIGHT);
 
+
     for(usize i = 0; i < FRAMES_IN_FLIGHT; i++) {
 	this->descriptor_sets[i] =
 	    std::make_unique<vkn::DescriptorSet>(
-		*this->uniform_buffers[i],
 		*this->descriptor_set_layout,
-		*this->descriptor_pool,
-		sizeof(UniformBufferObject),
-		*this->textures["texture"]);
+		*this->descriptor_pool);
+
+	VkDescriptorBufferInfo buffer_info =
+	    this->uniform_buffers[i]->descriptor_info();
+	VkDescriptorImageInfo image_info =
+	    this->textures["texture"]->descriptor_info();
+
+	this->descriptor_sets[i]->add_uniform(&buffer_info)
+	    .add_sampler(&image_info)
+	    .submit();
     }
 }
 

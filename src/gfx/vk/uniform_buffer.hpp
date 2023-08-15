@@ -16,6 +16,8 @@ struct UniformBuffer {
 
     void *data;
 
+    usize size;
+
     UniformBuffer() = default;
     explicit UniformBuffer(usize size);
 
@@ -35,18 +37,27 @@ struct UniformBuffer {
 	other.data = nullptr;
 	return *this;
     }
+
+    VkDescriptorBufferInfo descriptor_info();
 };
 
 struct DescriptorSetLayout {
-    VkDescriptorSetLayout handle;
-
     enum Stage {
 	STAGE_VERTEX,
 	STAGE_FRAGMENT
-    } stage;
+    };
+
+    struct Binding {
+	u32 location;
+	Stage stage;
+	VkDescriptorType type;
+    };
+
+    VkDescriptorSetLayout handle;
 
     DescriptorSetLayout() = default;
-    DescriptorSetLayout(Stage stage);
+    explicit DescriptorSetLayout(
+	const std::vector<Binding> &bindings);
 
     ~DescriptorSetLayout();
 
@@ -83,15 +94,21 @@ struct DescriptorPool {
 };
 
 struct DescriptorSet {
+    struct Info {
+	usize size = 0;
+	std::vector<VkWriteDescriptorSet> descriptor_writes;
+
+	inline void clear() {
+	    this->descriptor_writes.clear();
+	}
+    } info;
+
     VkDescriptorSet handle;
 
     DescriptorSet() = default;
     DescriptorSet(
-	const vkn::UniformBuffer &uniform_buffer,
 	const vkn::DescriptorSetLayout &layout,
-	const vkn::DescriptorPool &pool,
-	usize ubo_size,
-	const FileTexture &texture);
+	const vkn::DescriptorPool &pool);
 
     ~DescriptorSet() = default;
     DescriptorSet(const DescriptorSet &other) = delete;
@@ -104,6 +121,10 @@ struct DescriptorSet {
 	other.handle = VK_NULL_HANDLE;
 	return *this;
     }
+
+    DescriptorSet &add_uniform(VkDescriptorBufferInfo *info);
+    DescriptorSet &add_sampler(VkDescriptorImageInfo *info);
+    void submit();
 };
 
 }

@@ -273,3 +273,12 @@ vkn::FileTexture::~FileTexture() {
 	this->image_view,
 	nullptr);
 }
+
+VkDescriptorImageInfo vkn::FileTexture::descriptor_info() {
+    VkDescriptorImageInfo image_info {};
+    image_info.imageLayout =
+	VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    image_info.imageView = this->image_view;
+    image_info.sampler = this->sampler;
+    return image_info;
+}

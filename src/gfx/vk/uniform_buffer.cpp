@@ -3,7 +3,7 @@
 #include "buffers.hpp"
 #include "global.hpp"
 
-vkn::UniformBuffer::UniformBuffer(usize size) {
+vkn::UniformBuffer::UniformBuffer(usize size) : size(size) {
     vkn::make_buffer(
 	size,
 	VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
@@ -26,36 +26,36 @@ vkn::UniformBuffer::~UniformBuffer() {
 	this->alloc);	
 }
 
+VkDescriptorBufferInfo vkn::UniformBuffer::descriptor_info() {
+    VkDescriptorBufferInfo buffer_info {};
+    buffer_info.buffer = this->handle;
+    buffer_info.offset = 0;
+    buffer_info.range = this->size;
+    return buffer_info;
+}
+
 vkn::DescriptorSetLayout::DescriptorSetLayout(
-    vkn::DescriptorSetLayout::Stage stage)
-    : stage(stage) {
-    VkDescriptorSetLayoutBinding layout_binding {};
-    layout_binding.binding = 0;
-    layout_binding.stageFlags = stage == STAGE_VERTEX ? 
-	VK_SHADER_STAGE_VERTEX_BIT
-	: VK_SHADER_STAGE_FRAGMENT_BIT;
-    layout_binding.descriptorType =
-	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    layout_binding.descriptorCount = 1;
+    const std::vector<Binding> &bindings) {
+    
+    std::vector<VkDescriptorSetLayoutBinding> vk_bindings;
 
-    VkDescriptorSetLayoutBinding sampler_binding {};
-    sampler_binding.binding = 1;
-    sampler_binding.stageFlags =
-	VK_SHADER_STAGE_FRAGMENT_BIT;
-    sampler_binding.descriptorType =
-	VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    sampler_binding.descriptorCount = 1;
+    for(const auto &binding : bindings) {
+	VkDescriptorSetLayoutBinding vk_binding {};
+	vk_binding.binding = binding.location;
+	vk_binding.stageFlags = binding.stage == STAGE_VERTEX ?
+	    VK_SHADER_STAGE_VERTEX_BIT
+	    : VK_SHADER_STAGE_FRAGMENT_BIT;
+	vk_binding.descriptorType = binding.type;
+	vk_binding.descriptorCount = 1;
 
-    VkDescriptorSetLayoutBinding bindings[] = {
-	layout_binding,
-	sampler_binding
-    };
+	vk_bindings.push_back(vk_binding);
+    }
 
     VkDescriptorSetLayoutCreateInfo create_info {};
     create_info.sType =
 	VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    create_info.bindingCount = 2;
-    create_info.pBindings = bindings;
+    create_info.bindingCount = bindings.size();
+    create_info.pBindings = &vk_bindings[0];
 
     if(vkCreateDescriptorSetLayout(
 	global.vk_global->device->handle,
@@ -109,11 +109,8 @@ vkn::DescriptorPool::~DescriptorPool() {
 }
 
 vkn::DescriptorSet::DescriptorSet(
-    const vkn::UniformBuffer &uniform_buffer,
     const vkn::DescriptorSetLayout &layout,
-    const vkn::DescriptorPool &pool,
-    usize ubo_size,
-    const FileTexture &texture) {
+    const vkn::DescriptorPool &pool) {
     VkDescriptorSetAllocateInfo alloc_info {};
     alloc_info.sType =
 	VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -128,44 +125,53 @@ vkn::DescriptorSet::DescriptorSet(
 	log("Failed to allocate descriptor set", LOG_LEVEL_FATAL);
 	std::exit(-1);
     }
+}
 
-    VkDescriptorBufferInfo buffer_info {};
-    buffer_info.buffer = uniform_buffer.handle;
-    buffer_info.offset = 0;
-    buffer_info.range = ubo_size;
-
-    VkDescriptorImageInfo image_info {};
-    image_info.imageLayout =
-	VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    image_info.imageView = texture.image_view;
-    image_info.sampler = texture.sampler;
-
-    std::array<VkWriteDescriptorSet, 2> descriptor_writes {};
-
-    descriptor_writes[0].sType =
+vkn::DescriptorSet &vkn::DescriptorSet::add_uniform(
+    VkDescriptorBufferInfo *info) {
+    VkWriteDescriptorSet descriptor_write {};
+    descriptor_write.sType =
 	VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptor_writes[0].dstSet = this->handle;
-    descriptor_writes[0].dstBinding = 0;
-    descriptor_writes[0].dstArrayElement = 0;
-    descriptor_writes[0].descriptorType =
+    descriptor_write.dstSet = this->handle;
+    descriptor_write.dstBinding = this->info.size;
+    descriptor_write.dstArrayElement = 0;
+    descriptor_write.descriptorType =
 	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptor_writes[0].descriptorCount = 1;
-    descriptor_writes[0].pBufferInfo = &buffer_info;
+    descriptor_write.descriptorCount = 1;
+    descriptor_write.pBufferInfo = info;
 
-    descriptor_writes[1].sType =
+    this->info.descriptor_writes.push_back(descriptor_write);
+    this->info.size++;
+
+    return *this;
+}
+
+vkn::DescriptorSet &vkn::DescriptorSet::add_sampler(
+    VkDescriptorImageInfo *info) {
+    VkWriteDescriptorSet descriptor_write {};
+    descriptor_write.sType =
 	VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptor_writes[1].dstSet = this->handle;
-    descriptor_writes[1].dstBinding = 1;
-    descriptor_writes[1].dstArrayElement = 0;
-    descriptor_writes[1].descriptorType =
+    descriptor_write.dstSet = this->handle;
+    descriptor_write.dstBinding = this->info.size;
+    descriptor_write.dstArrayElement = 0;
+    descriptor_write.descriptorType =
 	VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptor_writes[1].descriptorCount = 1;
-    descriptor_writes[1].pImageInfo = &image_info;
+    descriptor_write.descriptorCount = 1;
+    descriptor_write.pImageInfo = info;
 
+    this->info.descriptor_writes.push_back(descriptor_write);
+    this->info.size++;
+
+    return *this;
+}
+
+void vkn::DescriptorSet::submit() {
     vkUpdateDescriptorSets(
 	global.vk_global->device->handle,
-	descriptor_writes.size(),
-	&descriptor_writes[0],
+	this->info.descriptor_writes.size(),
+	&this->info.descriptor_writes[0],
 	0,
 	nullptr);
+
+    this->info.clear();
 }
