@@ -4,12 +4,12 @@
 
 #include "gfx.hpp"
 #include "util/util.hpp"
-#include "vk/pipeline.hpp"
-#include "vk/command_buffer.hpp"
-#include "vk/sync.hpp"
-#include "vk/vertex_buffer.hpp"
-#include "vk/uniform_buffer.hpp"
-#include "vk/file_texture.hpp"
+#include "vk/vk_pipeline.hpp"
+#include "vk/vk_command_buffer.hpp"
+#include "vk/vk_sync.hpp"
+#include "vk/vk_vertex_buffer.hpp"
+#include "vk/vk_uniform_buffer.hpp"
+#include "vk/vk_file_texture.hpp"
 
 struct Renderer {
     struct UniformBufferObject {
@@ -34,8 +34,7 @@ struct Renderer {
 
     static constexpr u32 FRAMES_IN_FLIGHT = 3;
 
-    std::unique_ptr<VKDescriptorSetLayout>
-	descriptor_set_layout;
+    VkDescriptorSetLayout descriptor_layout;
 
     std::unordered_map<
 	std::string,
@@ -69,11 +68,11 @@ struct Renderer {
 	std::unique_ptr<VKUniformBuffer>,
 	FRAMES_IN_FLIGHT> uniform_buffers;
 
-    std::unique_ptr<VKDescriptorPool> descriptor_pool;
-
     std::array<
-	std::unique_ptr<VKDescriptorSet>,
-	FRAMES_IN_FLIGHT> descriptor_sets;
+	std::unique_ptr<VKUniformBuffer>,
+	FRAMES_IN_FLIGHT> brightness_uniform_buffers;
+
+    std::array<VkDescriptorSet, FRAMES_IN_FLIGHT> descriptors;
 
     Renderer();
 

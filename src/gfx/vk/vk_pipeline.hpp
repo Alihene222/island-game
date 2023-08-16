@@ -2,7 +2,7 @@
 
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
-#include "uniform_buffer.hpp"
+#include "vk_uniform_buffer.hpp"
 
 struct VKPipeline {
     VkPipeline handle;

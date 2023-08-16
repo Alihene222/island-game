@@ -1,7 +1,7 @@
-#include "buffers.hpp"
+#include "vk_buffers.hpp"
 
 #include "global.hpp"
-#include "command_buffer.hpp"
+#include "vk_command_buffer.hpp"
 
 void make_buffer(
     VkDeviceSize size,

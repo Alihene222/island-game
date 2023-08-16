@@ -1,6 +1,6 @@
-#include "vertex_buffer.hpp"
+#include "vk_vertex_buffer.hpp"
 
-#include "buffers.hpp"
+#include "vk_buffers.hpp"
 #include "global.hpp"
 
 VkVertexInputBindingDescription

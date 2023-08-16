@@ -3,7 +3,7 @@
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
 #include "util/util.hpp"
-#include "gfx/vk/instance.hpp"
+#include "gfx/vk/vk_instance.hpp"
 
 struct Mouse {
     f32 x, y;

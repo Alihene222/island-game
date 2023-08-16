@@ -1,8 +1,8 @@
-#include "pipeline.hpp"
+#include "vk_pipeline.hpp"
 
 #include "util/util.hpp"
 #include "global.hpp"
-#include "vertex_buffer.hpp"
+#include "vk_vertex_buffer.hpp"
 
 static std::vector<char> read_shader_file(
     const std::string &path) {

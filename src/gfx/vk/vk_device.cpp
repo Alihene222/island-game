@@ -1,6 +1,6 @@
-#include "device.hpp"
+#include "vk_device.hpp"
 
-#include "physical_device.hpp"
+#include "vk_physical_device.hpp"
 #include "gfx/renderer.hpp"
 #include "global.hpp"
 

@@ -1,12 +1,13 @@
 #pragma once
 
 #include "gfx/gfx.hpp"
-#include "instance.hpp"
-#include "physical_device.hpp"
-#include "device.hpp"
-#include "swapchain.hpp"
-#include "command_buffer.hpp"
-#include "allocator.hpp"
+#include "vk_instance.hpp"
+#include "vk_physical_device.hpp"
+#include "vk_device.hpp"
+#include "vk_swapchain.hpp"
+#include "vk_command_buffer.hpp"
+#include "vk_allocator.hpp"
+#include "vk_uniform_buffer.hpp"
 
 struct VKGlobal {
     std::unique_ptr<VKInstance> instance;
@@ -23,9 +24,14 @@ struct VKGlobal {
 
     std::unique_ptr<VKAllocator> allocator;
 
+    VKDescriptorAllocator descriptor_allocator;
+
+    VKDescriptorLayoutCache descriptor_cache;
+
     VKGlobal() = default;
 
     ~VKGlobal() {
+	this->descriptor_allocator.cleanup();
 	this->swapchain.reset();
 	vkDestroySurfaceKHR(
 	    this->instance->handle, this->surface, nullptr);

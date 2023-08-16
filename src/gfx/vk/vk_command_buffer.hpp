@@ -3,7 +3,7 @@
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
 #include "util/util.hpp"
-#include "pipeline.hpp"
+#include "vk_pipeline.hpp"
 
 struct VKCommandPool {
     VkCommandPool handle;

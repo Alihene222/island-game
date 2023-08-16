@@ -34,37 +34,6 @@ Renderer::Renderer() {
 	    VKSwapchain::SRGB,
 	    VKSwapchain::FIFO);
 
-    std::vector<VKDescriptorSetLayout::Binding> bindings;
-    VKDescriptorSetLayout::Binding layout_binding;
-    layout_binding.location = 0;
-    layout_binding.stage =
-	VKDescriptorSetLayout::STAGE_VERTEX;
-    layout_binding.type =
-	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-
-    VKDescriptorSetLayout::Binding sampler_binding;
-    sampler_binding.location = 1;
-    sampler_binding.stage =
-	VKDescriptorSetLayout::STAGE_FRAGMENT;
-    sampler_binding.type =
-	VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-
-    bindings.push_back(layout_binding);
-    bindings.push_back(sampler_binding);
-
-    this->descriptor_set_layout =
-	std::make_unique<VKDescriptorSetLayout>(
-	    bindings);
-
-    this->pipelines["main"] =
-	std::make_shared<VKPipeline>(
-	    "res/shaders/basic.vert.spirv",
-	    "res/shaders/basic.frag.spirv",
-	    &this->descriptor_set_layout->handle);
-
-    global.vk_global->swapchain->create_framebuffers(
-	this->pipelines["main"]->render_pass);
-
     global.vk_global->command_pool =
 	std::make_unique<VKCommandPool>();
 
@@ -92,27 +61,49 @@ Renderer::Renderer() {
 	this->uniform_buffers[i] =
 	    std::make_unique<VKUniformBuffer>(
 		sizeof(UniformBufferObject));
+	this->brightness_uniform_buffers[i] =
+	    std::make_unique<VKUniformBuffer>(sizeof(f32));
     }
 
-    this->descriptor_pool =
-	std::make_unique<VKDescriptorPool>(FRAMES_IN_FLIGHT);
-
-
     for(usize i = 0; i < FRAMES_IN_FLIGHT; i++) {
-	this->descriptor_sets[i] =
-	    std::make_unique<VKDescriptorSet>(
-		*this->descriptor_set_layout,
-		*this->descriptor_pool);
-
 	VkDescriptorBufferInfo buffer_info =
 	    this->uniform_buffers[i]->descriptor_info();
+	VkDescriptorBufferInfo brightness_buffer_info =
+	    this->brightness_uniform_buffers[i]->descriptor_info();
 	VkDescriptorImageInfo image_info =
 	    this->textures["texture"]->descriptor_info();
 
-	this->descriptor_sets[i]->add_uniform(&buffer_info)
-	    .add_sampler(&image_info)
-	    .submit();
+	VKDescriptorBuilder::begin(
+	    &global.vk_global->descriptor_allocator,
+	    &global.vk_global->descriptor_cache)
+		.bind_buffer(
+		    0,
+		    &buffer_info,
+		    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		    VK_SHADER_STAGE_VERTEX_BIT)
+		.bind_buffer(
+		    1,
+		    &brightness_buffer_info,
+		    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		    VK_SHADER_STAGE_FRAGMENT_BIT)
+		.bind_image(
+		    2,
+		    &image_info,
+		    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+		    VK_SHADER_STAGE_FRAGMENT_BIT)
+		.build(
+		    this->descriptors[i],
+		    this->descriptor_layout);
     }
+
+    this->pipelines["main"] =
+	std::make_shared<VKPipeline>(
+	    "res/shaders/basic.vert.spirv",
+	    "res/shaders/basic.frag.spirv",
+	    &this->descriptor_layout);
+
+    global.vk_global->swapchain->create_framebuffers(
+	this->pipelines["main"]->render_pass);
 }
 
 Renderer::~Renderer() {
@@ -167,6 +158,13 @@ void Renderer::render() {
 	&ubo,
 	sizeof(UniformBufferObject));
 
+    f32 brightness = 0.1f;
+    std::memcpy(
+	this->brightness_uniform_buffers
+	    [this->current_frame]->data,
+	&brightness,
+	sizeof(f32));
+
     this->in_flight_fences[this->current_frame]->reset();
 
     this->command_buffers[this->current_frame]->reset();
@@ -192,8 +190,7 @@ void Renderer::render() {
 	global.renderer->pipelines["main"]->layout,
 	0,
 	1,
-	&this->descriptor_sets
-	    [this->current_frame]->handle,
+	&this->descriptors[current_frame],
 	0,
 	nullptr);
 

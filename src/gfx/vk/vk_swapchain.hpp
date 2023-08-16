@@ -2,7 +2,7 @@
 
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
-#include "pipeline.hpp"
+#include "vk_pipeline.hpp"
 
 struct SwapchainSupportDetails {
     VkSurfaceCapabilitiesKHR capabilities;

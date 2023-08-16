@@ -3,7 +3,7 @@
 #include "gfx/gfx.hpp"
 #include "util/std.hpp"
 #include "util/util.hpp"
-#include "instance.hpp"
+#include "vk_instance.hpp"
 
 struct QueueFamilyIndices {
     std::optional<u32> graphics;
