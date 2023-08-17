@@ -72,11 +72,12 @@ void VKCommandBuffer::begin(
     render_pass_info->renderArea.extent =
 	global.vk_global->swapchain->extent;
 
-    VkClearValue *clear_color =
-	global.frame_allocator.alloc<VkClearValue>();
-    *clear_color = {{{ 0.0f, 0.0f, 0.0f, 1.0f }}};
-    render_pass_info->clearValueCount = 1;
-    render_pass_info->pClearValues = clear_color;
+    VkClearValue *clear_values =
+	global.frame_allocator.alloc<VkClearValue*>(2);
+    clear_values[0].color = {{ 0.0f, 0.0f, 0.0f, 1.0f }};
+    clear_values[1].depthStencil = { 1.0f, 0 };
+    render_pass_info->clearValueCount = 2;
+    render_pass_info->pClearValues = clear_values;
 
     vkCmdBeginRenderPass(
 	this->handle,

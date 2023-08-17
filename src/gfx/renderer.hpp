@@ -10,6 +10,7 @@
 #include "vk/vk_vertex_buffer.hpp"
 #include "vk/vk_uniform_buffer.hpp"
 #include "vk/vk_file_texture.hpp"
+#include "vk/vk_depth_buffer.hpp"
 
 struct Renderer {
     struct UniformBufferObject {
@@ -57,6 +58,8 @@ struct Renderer {
 	FRAMES_IN_FLIGHT> in_flight_fences;
 
     u32 current_frame = 0;
+
+    std::unique_ptr<VKDepthBuffer> depth_buffer;
 
     std::unordered_map<
 	std::string,

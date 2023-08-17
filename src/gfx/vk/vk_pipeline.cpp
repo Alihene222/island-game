@@ -3,6 +3,7 @@
 #include "util/util.hpp"
 #include "global.hpp"
 #include "vk_vertex_buffer.hpp"
+#include "vk_depth_buffer.hpp"
 
 static std::vector<char> read_shader_file(
     const std::string &path) {
@@ -50,18 +51,65 @@ VKPipeline::VKPipeline(
     color_attachment_ref.layout =
 	VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentDescription depth_attachment{};
+    depth_attachment.format =
+	VKDepthBuffer::find_depth_format();
+    depth_attachment.loadOp =
+	VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depth_attachment.storeOp =
+	VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth_attachment.stencilLoadOp =
+	VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depth_attachment.stencilStoreOp =
+	VK_ATTACHMENT_STORE_OP_STORE;
+    depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depth_attachment.initialLayout =
+	VK_IMAGE_LAYOUT_UNDEFINED;
+    depth_attachment.finalLayout =
+	VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference depth_attachment_ref {};
+    depth_attachment_ref.attachment = 1;
+    depth_attachment_ref.layout =
+	VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDependency dependency {};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask =
+	VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+	| VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask =
+	VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+	| VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstAccessMask =
+	VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+	| VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
     VkSubpassDescription subpass {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &color_attachment_ref;
+    subpass.pDepthStencilAttachment =
+	&depth_attachment_ref;
+
+    std::array<VkAttachmentDescription, 2> attachments = {
+	color_attachment,
+	depth_attachment
+    };
 
     VkRenderPassCreateInfo render_pass_create_info {};
     render_pass_create_info.sType =
 	VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    render_pass_create_info.attachmentCount = 1;
-    render_pass_create_info.pAttachments = &color_attachment;
+    render_pass_create_info.attachmentCount =
+	attachments.size();
+    render_pass_create_info.pAttachments = &attachments[0];
     render_pass_create_info.subpassCount = 1;
     render_pass_create_info.pSubpasses = &subpass;
+    render_pass_create_info.dependencyCount = 1;
+    render_pass_create_info.pDependencies =
+	&dependency;
 
     if(vkCreateRenderPass(
 	global.vk_global->device->handle,
@@ -189,6 +237,15 @@ VKPipeline::VKPipeline(
     blend_info.pAttachments = &color_blend_attachment;
     blend_info.logicOpEnable = VK_FALSE;
 
+    VkPipelineDepthStencilStateCreateInfo depth_stencil_info {};
+    depth_stencil_info.sType =
+	VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depth_stencil_info.depthTestEnable = VK_TRUE;
+    depth_stencil_info.depthWriteEnable = VK_TRUE;
+    depth_stencil_info.depthCompareOp = VK_COMPARE_OP_LESS;
+    depth_stencil_info.depthBoundsTestEnable = VK_FALSE;
+    depth_stencil_info.stencilTestEnable = VK_FALSE;
+
     VkPipelineLayoutCreateInfo layout_create_info {};
     layout_create_info.sType =
 	VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -216,6 +273,7 @@ VKPipeline::VKPipeline(
     create_info.pMultisampleState = &multisampling_state;
     create_info.pColorBlendState = &blend_info;
     create_info.pDynamicState = &dynamic_state_info;
+    create_info.pDepthStencilState = &depth_stencil_info;
     create_info.layout = this->layout;
     create_info.renderPass = this->render_pass;
     create_info.subpass = 0;

@@ -137,39 +137,16 @@ VKFileTexture::VKFileTexture(std::string path) {
 
     stbi_image_free(data);
 
-    VkImageCreateInfo create_info {};
-    create_info.sType =
-	VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    create_info.imageType = VK_IMAGE_TYPE_2D;
-    create_info.extent.width = tex_width;
-    create_info.extent.height = tex_height;
-    create_info.extent.depth = 1;
-    create_info.mipLevels = 1;
-    create_info.arrayLayers = 1;
-    create_info.format = VK_FORMAT_R8G8B8A8_SRGB;
-    create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
-    create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    create_info.usage =
+    make_image(
+	tex_width,
+	tex_height,
+	VK_FORMAT_R8G8B8A8_SRGB,
+	VK_IMAGE_TILING_OPTIMAL,
 	VK_IMAGE_USAGE_TRANSFER_DST_BIT
-	| VK_IMAGE_USAGE_SAMPLED_BIT;
-    create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    create_info.samples = VK_SAMPLE_COUNT_1_BIT;
-
-    VmaAllocationCreateInfo alloc_create_info {};
-    alloc_create_info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-
-    if(vmaCreateImage(
-	global.vk_global->allocator->handle,
-	&create_info,
-	&alloc_create_info,
+	| VK_IMAGE_USAGE_SAMPLED_BIT,
 	&this->image,
 	&this->image_alloc,
-	nullptr) != VK_SUCCESS) {
-	log(
-	    "Failed to create image for path " + path,
-	    LOG_LEVEL_FATAL);
-	std::exit(-1);
-    }
+	VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
 
     global.vk_global->allocator->add_entry(
 	this->image,

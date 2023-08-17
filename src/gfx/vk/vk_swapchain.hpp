@@ -58,9 +58,13 @@ struct VKSwapchain {
 	return *this;
     }
 
-    void create_framebuffers(VkRenderPass render_pass);
+    void create_framebuffers(
+	VkRenderPass render_pass,
+	VkImageView depth_image_view);
 
-    void adapt(VkRenderPass render_pass);
+    void adapt(
+	VkRenderPass render_pass,
+	VkImageView depth_image_view);
 
 private:
     void create();

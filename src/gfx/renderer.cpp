@@ -1,16 +1,24 @@
 #include "renderer.hpp"
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "global.hpp"
 
 static const Vertex vertices[] = {
-    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.0f}, {1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+    {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+    {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+    {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    {{-0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 };
 
 Renderer::Renderer() {
@@ -32,10 +40,13 @@ Renderer::Renderer() {
     global.vk_global->swapchain =
 	std::make_unique<VKSwapchain>(
 	    VKSwapchain::SRGB,
-	    VKSwapchain::FIFO);
+	    VKSwapchain::MAILBOX);
 
     global.vk_global->command_pool =
 	std::make_unique<VKCommandPool>();
+
+    this->depth_buffer =
+	std::make_unique<VKDepthBuffer>();
 
     for(usize i = 0; i < FRAMES_IN_FLIGHT; i++) {
 	this->command_buffers[i] =
@@ -103,7 +114,8 @@ Renderer::Renderer() {
 	    &this->descriptor_layout);
 
     global.vk_global->swapchain->create_framebuffers(
-	this->pipelines["main"]->render_pass);
+	this->pipelines["main"]->render_pass,
+	this->depth_buffer->image_view);
 }
 
 Renderer::~Renderer() {
@@ -128,7 +140,8 @@ void Renderer::render() {
 
     if(result == VK_ERROR_OUT_OF_DATE_KHR) {
 	global.vk_global->swapchain->adapt(
-	    this->pipelines["main"]->render_pass);
+	    this->pipelines["main"]->render_pass,
+	    this->depth_buffer->image_view);
     } else if(result != VK_SUCCESS
 	&& result != VK_SUBOPTIMAL_KHR) {
 	log("Failed to adapt swapchain", LOG_LEVEL_ERROR);
@@ -196,7 +209,7 @@ void Renderer::render() {
 
     vkCmdDraw(
 	this->command_buffers[this->current_frame]->handle,
-	6, 1, 0, 0);
+	12, 1, 0, 0);
 
     this->command_buffers[this->current_frame]->end();
 
@@ -258,7 +271,8 @@ void Renderer::render() {
 	|| result == VK_SUBOPTIMAL_KHR
 	|| global.platform->window->size_changed) {
 	global.vk_global->swapchain->adapt(
-	    this->pipelines["main"]->render_pass);
+	    this->pipelines["main"]->render_pass,
+	    this->depth_buffer->image_view);
 	    global.platform->window->size_changed = false;
     } else if(result != VK_SUCCESS) {
 	log(

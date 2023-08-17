@@ -14,3 +14,13 @@ void make_buffer(
     f32 priority);
 
 void copy_buffer(VkBuffer src, VkBuffer dst, VkDeviceSize size);
+
+void make_image(
+    u32 width,
+    u32 height,
+    VkFormat format,
+    VkImageTiling tiling,
+    VkImageUsageFlags usage,
+    VkImage *image,
+    VmaAllocation *alloc,
+    VmaAllocationCreateFlags mem_flags);

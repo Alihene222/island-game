@@ -131,18 +131,20 @@ void VKSwapchain::destroy() {
 }
 
 void VKSwapchain::create_framebuffers(
-    VkRenderPass render_pass) {
+    VkRenderPass render_pass,
+    VkImageView depth_image_view) {
     this->framebuffers.resize(this->image_views.size());
     for(u64 i = 0; i < this->image_views.size(); i++) {
 	VkImageView attachments[] = {
-	    this->image_views[i]
+	    this->image_views[i],
+	    depth_image_view
 	};
 
 	VkFramebufferCreateInfo create_info {};
 	create_info.sType =
 	    VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	create_info.renderPass = render_pass;
-	create_info.attachmentCount = 1;
+	create_info.attachmentCount = 2;
 	create_info.pAttachments = attachments;
 	create_info.width = this->extent.width;
 	create_info.height = this->extent.height;
@@ -158,7 +160,9 @@ void VKSwapchain::create_framebuffers(
     }
 }
 
-void VKSwapchain::adapt(VkRenderPass render_pass) {
+void VKSwapchain::adapt(
+    VkRenderPass render_pass,
+    VkImageView depth_image_view) {
     std::tuple<i32, i32> tuple =
 	global.platform->window->get_size();
     i32 width = std::get<0>(tuple);
@@ -175,7 +179,8 @@ void VKSwapchain::adapt(VkRenderPass render_pass) {
     this->destroy();
 
     this->create();
-    this->create_framebuffers(render_pass);
+    this->create_framebuffers(
+	render_pass, depth_image_view);
 }
 
 SwapchainSupportDetails VKSwapchain::query_support(
